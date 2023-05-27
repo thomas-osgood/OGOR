@@ -1,4 +1,4 @@
-package IPInfo
+package ipinfo
 
 // structure defining the main IPInfo object that the
 // user will create to query IPInfo.io

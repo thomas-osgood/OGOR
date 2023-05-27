@@ -1,4 +1,4 @@
-package IPInfo
+package ipinfo
 
 type ConfigFunc func(*ConfigStruct)
 

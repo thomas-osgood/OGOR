@@ -1,4 +1,4 @@
-package IPInfo
+package ipinfo
 
 // package that holds objects and functions related to
 // querying the site IPInfo.io and get information
