@@ -1,4 +1,4 @@
-package ipinfo
+package github.com/thomas-osgood/OGOR/networking/ipinfo
 
 // package that holds objects and functions related to
 // querying the site IPInfo.io and get information

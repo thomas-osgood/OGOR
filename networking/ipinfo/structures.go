@@ -1,4 +1,4 @@
-package ipinfo
+package github.com/thomas-osgood/OGOR/networking/ipinfo
 
 // structure defining the main IPInfo object that the
 // user will create to query IPInfo.io
