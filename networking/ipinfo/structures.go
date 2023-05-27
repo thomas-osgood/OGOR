@@ -1,4 +1,4 @@
-package github.com/thomas-osgood/OGOR/networking/ipinfo
+package ipinfo
 
 // structure defining the main IPInfo object that the
 // user will create to query IPInfo.io
@@ -81,4 +81,3 @@ type PrivacyStruct struct {
 	Hosting bool   `json:"hosting"`
 	Service string `json:"service"`
 }
-

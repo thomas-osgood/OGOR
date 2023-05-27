@@ -1,4 +1,4 @@
-package github.com/thomas-osgood/OGOR/networking/ipinfo
+package ipinfo
 
 // package that holds objects and functions related to
 // querying the site IPInfo.io and get information
@@ -140,4 +140,3 @@ func (inf *IPInfoStruct) IsInternalAddress() (internal bool, err error) {
 
 	return inf.Bogon, nil
 }
-

@@ -1,4 +1,3 @@
-package github.com/thomas-osgood/OGOR/networking/ipinfo
+package ipinfo
 
 type ConfigFunc func(*ConfigStruct)
-
