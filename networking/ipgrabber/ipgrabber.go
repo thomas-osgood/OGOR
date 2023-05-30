@@ -97,12 +97,6 @@ func (grabber *IPGrabber) GrabInterfaceIP(targetiface string) (ipaddr net.IP, er
 	}
 
 	for _, iface := range grabber.Interfaces {
-		//------------------------------------------------------------
-		// ignore loopback addresses (127.0.0.1)
-		//------------------------------------------------------------
-		if strings.Contains(iface.Flags.String(), net.FlagLoopback.String()) {
-			continue
-		}
 
 		//------------------------------------------------------------
 		// if target interface is set, only display target
@@ -174,13 +168,6 @@ func (grabber *IPGrabber) GrabIPs() (err error) {
 	}
 
 	for _, iface = range grabber.Interfaces {
-
-		//------------------------------------------------------------
-		// ignore loopback addresses (127.0.0.1)
-		//------------------------------------------------------------
-		if strings.Contains(iface.Flags.String(), net.FlagLoopback.String()) {
-			continue
-		}
 
 		//------------------------------------------------------------
 		// grab all addresses from current interface
@@ -259,6 +246,29 @@ func (grabber *IPGrabber) ListIPs() (err error) {
 	for _, ipAddr := range grabber.Discovered {
 		fmt.Printf("%s\n", ipAddr.String())
 	}
+}
+
+// function designed to list out all discovered Interfaces on
+// the current machine. if the interface slice is empty, it will
+// attempt to populate it first.
+func (grabber *IPGrabber) ListIFaces() (err error) {
+	if len(grabber.Interfaces) < 1 {
+		err = grabber.GrabInterfaces()
+		if err != nil {
+			return err
+		}
+
+		if len(grabber.Interfaces) < 1 {
+			return errors.New("no network interfaces discovered on this machine")
+		}
+	}
+
+	for _, iface := range grabber.Interfaces {
+		fmt.Printf("[*] %s\n", iface.Name)
+	}
+
+	return nil
+}
 
 	return nil
 }
