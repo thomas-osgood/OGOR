@@ -1,5 +1,12 @@
 package ipgrabber
 
+// package designed to be a user-friendly way to interact with
+// the various network interfaces of one's computer. this will
+// allow the user to grab the IP address of a given interface,
+// grab all the IPs of all interfaces, etc. this can be very
+// useful when performing network-specific tasks that require
+// interaction on a specific interface.
+
 import (
 	"errors"
 	"fmt"
