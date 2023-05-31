@@ -269,7 +269,3 @@ func (grabber *IPGrabber) ListIFaces() (err error) {
 
 	return nil
 }
-
-	return nil
-}
-
