@@ -1,6 +1,8 @@
+// # Osgood GOlang Repository (OGOR)
+//
+// a collection of custom packages designed to simplify various,
+// ranging from basic output/logging to networking and beyond.
 package main
-
-// main package in OGOR. this will import all subpackages.
 
 import (
 	_ "github.com/thomas-osgood/OGOR/networking/ipgrabber"
