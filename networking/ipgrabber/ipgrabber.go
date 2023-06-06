@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"strings"
 )
 
 // function designed to add an IP address to the list of
@@ -152,8 +151,8 @@ func (grabber *IPGrabber) GrabInterfaceIP(targetiface string) (ipaddr net.IP, er
 	return ipaddr, nil
 }
 
-//    Function designed to acquire all IPv4 network addresses
-//    attached to the current machine.
+// Function designed to acquire all IPv4 network addresses
+// attached to the current machine.
 func (grabber *IPGrabber) GrabIPs() (err error) {
 	var address net.Addr
 	var addresses []net.Addr
@@ -218,24 +217,22 @@ func (grabber *IPGrabber) IFacesEmpty() (empty bool) {
 	return empty
 }
 
-//
 // Function Name: ListIPs
 //
 // Author: Thomas Osgood
 //
 // Description:
 //
-//    Function designed to grab all IPv4 IPs attached to all
-//    network interfaces and list them out.
+//	Function designed to grab all IPv4 IPs attached to all
+//	network interfaces and list them out.
 //
 // Input(s):
 //
-//    None
+//	None
 //
 // Return(s):
 //
-//    err - error. error or nil.
-//
+//	err - error. error or nil.
 func (grabber *IPGrabber) ListIPs() (err error) {
 
 	err = grabber.GrabIPs()
@@ -246,6 +243,8 @@ func (grabber *IPGrabber) ListIPs() (err error) {
 	for _, ipAddr := range grabber.Discovered {
 		fmt.Printf("%s\n", ipAddr.String())
 	}
+
+	return nil
 }
 
 // function designed to list out all discovered Interfaces on
