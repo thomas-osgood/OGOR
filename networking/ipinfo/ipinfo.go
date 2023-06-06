@@ -1,11 +1,10 @@
-package ipinfo
-
 // package that holds objects and functions related to
 // querying the site IPInfo.io and get information
 // related to a given IP address. this package can be
 // useful in target enumeration and analysis.
 //
 // information regarding IPInfo.io's API can be found at https://ipinfo.io/developers.
+package ipinfo
 
 import (
 	"encoding/json"
