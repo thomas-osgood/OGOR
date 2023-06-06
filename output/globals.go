@@ -6,7 +6,7 @@ import "fmt"
 var CSI string = fmt.Sprintf("%s[", ESCAPE_CODE)
 
 // control sequence used to clear the entirty of the current line
-var CLEAR_LINE string = fmt.Sprintf("\r\n%s0K", CSI)
+var CLEAR_LINE string = fmt.Sprintf("\r%s0K", CSI)
 
 // control sequence used to clear the entire screen and move
 // the cursor to (0,0).
@@ -31,4 +31,3 @@ var FAIL_SEQ string = fmt.Sprintf("%s[%s]%s", RED_L_SEQ, FAIL_CHR, ANSI_RESET)
 var WARNING_SEQ string = fmt.Sprintf("%s[%s]%s", YELLOW_L_SEQ, WARNING_CHR, ANSI_RESET)
 var INFO_SEQ string = fmt.Sprintf("%s[%s]%s", BLUE_L_SEQ, INFO_CHR, ANSI_RESET)
 var SYS_SEQ string = fmt.Sprintf("%s[%s]%s", YELLOW_L_SEQ, SYS_CHR, ANSI_RESET)
-
