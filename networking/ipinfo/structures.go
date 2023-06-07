@@ -36,10 +36,10 @@ type IPInfoStruct struct {
 	// user has been authenticated and has an account
 	// with IPInfo.io.
 
-	Asn     ASNStruct
-	Company CompanyStruct
-	Privacy PrivacyStruct
-	Abuse   AbuseStruct
+	Asn     ASNStruct     `json:"asn"`
+	Company CompanyStruct `json:"company"`
+	Privacy PrivacyStruct `json:"privacy"`
+	Abuse   AbuseStruct   `json:"abuse"`
 }
 
 // structure designed to hold the Abuse info pice
