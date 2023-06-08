@@ -19,10 +19,9 @@ const ANSI_GREEN_L int = 92
 const ANSI_YELLOW_L int = 93
 const ANSI_BLUE_L int = 94
 
-var SUCCESS_CHR string = "+"
-var FAIL_CHR string = "-"
-var WARNING_CHR string = "!"
-var INFO_CHR string = "i"
+const SUCCESS_CHR string = "+"
+const FAIL_CHR string = "-"
+const WARNING_CHR string = "!"
+const INFO_CHR string = "i"
 
 const SYS_CHR string = "*"
-
