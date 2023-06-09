@@ -6,6 +6,7 @@ package main
 
 import (
 	_ "github.com/thomas-osgood/OGOR/commandline/arguments"
+	_ "github.com/thomas-osgood/OGOR/misc/generators"
 	_ "github.com/thomas-osgood/OGOR/networking/ipgrabber"
 	_ "github.com/thomas-osgood/OGOR/networking/ipinfo"
 	_ "github.com/thomas-osgood/OGOR/output"
