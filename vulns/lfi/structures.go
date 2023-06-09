@@ -13,6 +13,11 @@ type LFIChecker struct {
 	// requests to the target.
 	Checker LFIClient
 
+	// LFI filter evasion techniques discovered. this will
+	// be populated with successful evasion techniques when
+	// checking for the LFI signature using CheckSignature.
+	Evasions []string
+
 	// response length of a known good route.
 	GoodLength int
 
@@ -61,4 +66,3 @@ type LFIOptions struct {
 	// default: false
 	SSLConnection bool
 }
-
