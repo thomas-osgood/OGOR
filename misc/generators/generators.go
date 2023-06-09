@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// function designed to generate a random string between
+// function designed to generate a random string
 // with a length that falls within a designated range. this
 // can be useful for generating random file names or unique
 // usernames and passwords.
