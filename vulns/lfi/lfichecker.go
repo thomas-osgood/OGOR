@@ -10,6 +10,49 @@ import (
 	"net/http"
 )
 
+// function designed to check for an LFI signature using the current
+// LFIChecker configuration. this will compare the various lengths and
+// attempt to determine if LFI is present on the target. if no LFI
+// is present, an error will be returned.
+func (l *LFIChecker) CheckSignature() (err error) {
+	var goodbadcheck bool
+
+	// set the good length variable to check.
+	err = l.GetGoodLength()
+	if err != nil {
+		return err
+	}
+
+	// set the bad length variable to check.
+	err = l.GetBadLength()
+	if err != nil {
+		return err
+	}
+
+	// if good route content size is the same as bad route content size,
+	// this check will fail.
+	goodbadcheck = (l.BadLength != l.GoodLength)
+
+	if !goodbadcheck {
+		return errors.New("LFI signature not found on the target.")
+	}
+	return nil
+}
+
+// function designed to check for an LFI signature using the current
+// LFIChecker configuration. this will target URL parameters, compare
+// various lengths and attempt to determine if LFI is present on
+// the target. if no LFI is present, an error will be returned.
+func (l *LFIChecker) CheckSignatureWithParams() (err error) {
+
+	// make sure there are URL parameters to check.
+	if len(l.Options.Parameters) < 1 {
+		return errors.New("no parameters to check")
+	}
+
+	return nil
+}
+
 // function designed to contact the target and get the
 // length of a request that returns a 404 NOT FOUND response. this
 // length can be used as part of the check for LFI/Directory Traversal.
@@ -104,4 +147,3 @@ func (l *LFIChecker) SetGoodRoute(route string) (err error) {
 	l.GoodRoute = route
 	return nil
 }
-
