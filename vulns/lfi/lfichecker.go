@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/thomas-osgood/OGOR/misc/generators"
 )
 
 // function designed to check for an LFI signature using the current
@@ -15,7 +17,12 @@ import (
 // attempt to determine if LFI is present on the target. if no LFI
 // is present, an error will be returned.
 func (l *LFIChecker) CheckSignature() (err error) {
+	var bclen int
+	var bodycontent []byte
+	var bypass string
 	var goodbadcheck bool
+	var patternstring string
+	var randfolder string
 
 	// set the good length variable to check.
 	err = l.GetGoodLength()
@@ -36,6 +43,33 @@ func (l *LFIChecker) CheckSignature() (err error) {
 	if !goodbadcheck {
 		return errors.New("LFI signature not found on the target.")
 	}
+
+	// generate random folder name to use for LFI signature test.
+	randfolder, err = generators.GenRandomName(generators.DEFAULT_RAND_MIN, generators.DEFAULT_RAND_MAX)
+	if err != nil {
+		return err
+	}
+
+	for _, bypass = range lfipatterns {
+		patternstring = ""
+		for i := 0; i < 10; i++ {
+			patternstring = fmt.Sprintf("%s%s", patternstring, bypass)
+		}
+		patternstring = fmt.Sprintf("%s%s", patternstring, randfolder)
+		bodycontent, err = l.GetBodyContent(patternstring)
+		if err != nil {
+			continue
+		}
+		bclen = len(bodycontent)
+
+		// make sure the returned length does not equal the
+		// good response length and the bad response length.
+		// if neither is a match, LFI is likely.
+		if (bclen != l.GoodLength) && (bclen != l.BadLength) {
+			l.Evasions = append(l.Evasions, bypass)
+		}
+	}
+
 	return nil
 }
 
@@ -91,6 +125,26 @@ func (l *LFIChecker) GetBadLength() (err error) {
 	l.BadLength = bodylen
 
 	return nil
+}
+
+// function designed to perform an HTTP GET request on a target
+// route, returning the body content of the resonse.  this is
+// useful when checking the response length of a target route.
+func (l *LFIChecker) GetBodyContent(route string) (bodycontent []byte, err error) {
+	var targetURL string = fmt.Sprintf("%s/%s", l.Checker.baseurl, route)
+
+	resp, err := l.Checker.client.Get(targetURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	bodycontent, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return bodycontent, nil
 }
 
 // function designed to contact the target and get the
