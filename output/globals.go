@@ -6,7 +6,7 @@ import "fmt"
 var CSI string = fmt.Sprintf("%s[", ESCAPE_CODE)
 
 // control sequence used to clear the entirty of the current line
-var CLEAR_LINE string = fmt.Sprintf("\r%s0K", CSI)
+var CLEAR_LINE string = fmt.Sprintf("\r%s2K\r", CSI)
 
 // control sequence used to clear the entire screen and move
 // the cursor to (0,0).
