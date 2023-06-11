@@ -1,5 +1,7 @@
 package lfichecker
 
+import "errors"
+
 // function designed to set the DoubleEncoding flag for
 // a given LFIOptions object.
 func UsingDoubleEncoding(opt *LFIOptions) (err error) {
@@ -20,6 +22,16 @@ func UsingSSL(opt *LFIOptions) (err error) {
 func WithParameter(param string, goodval string) LFIOptsFunc {
 	return func(o *LFIOptions) error {
 		o.Parameters[param] = goodval
+		return nil
+	}
+}
+
+func WithTarget(targetfile string) LFIOptsFunc {
+	return func(o *LFIOptions) error {
+		if len(targetfile) < 1 {
+			return errors.New("targetfile must be non-zero length string")
+		}
+		o.TargetFile = targetfile
 		return nil
 	}
 }
