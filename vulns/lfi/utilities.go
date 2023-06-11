@@ -17,10 +17,13 @@ func NewLFIChecker(baseurl string, usropts ...LFIOptsFunc) (checker *LFIChecker,
 
 	// create the new LFIChecker object to return to the user.
 	checker = &LFIChecker{
-		Checker:   LFIClient{baseurl: baseurl, client: client},
-		GoodRoute: "",
-		BadRoute:  "",
-		Options:   opts,
+		Checker:          LFIClient{baseurl: baseurl, client: client},
+		GoodRoute:        "",
+		BadRoute:         "",
+		BadLengthParams:  make(map[string]int),
+		BlankLength:      make(map[string]int),
+		Options:          opts,
+		VulnerableParams: make(map[string]string),
 	}
 
 	return checker, nil
