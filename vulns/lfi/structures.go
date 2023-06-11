@@ -9,6 +9,11 @@ type LFIChecker struct {
 	// respone length of a known bad route
 	BadLength int
 
+	// mapping of parameter bad values to return lengths.
+	// these were the lengths returned when CheckBadLengthParams
+	// was executed.
+	BadLengthParams map[string]int
+
 	// response length for a blank parameter.
 	// this is only used when URL parameters are specified.
 	BlankLength int
