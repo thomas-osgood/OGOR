@@ -22,7 +22,6 @@ func (l *LFIChecker) CheckParameter(param string) (err error) {
 	var params url.Values = url.Values{}
 	var req *http.Request
 	var resp *http.Response
-	var targetfile string = "etc/passwd"
 	var targeturl string = fmt.Sprintf("%s/%s", l.Checker.baseurl, l.GoodRoute)
 	const traverselen int = 10
 	var traversestr string = ""
@@ -32,7 +31,7 @@ func (l *LFIChecker) CheckParameter(param string) (err error) {
 			traversestr = fmt.Sprintf("%s%s", traversestr, bypass)
 		}
 
-		params.Set(param, fmt.Sprintf("%s%s", traversestr, targetfile))
+		params.Set(param, fmt.Sprintf("%s%s", traversestr, l.TargetFile))
 
 		req, err = http.NewRequest(http.MethodGet, targeturl, nil)
 		if err != nil {
