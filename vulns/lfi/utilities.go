@@ -23,6 +23,7 @@ func NewLFIChecker(baseurl string, usropts ...LFIOptsFunc) (checker *LFIChecker,
 		BadLengthParams:  make(map[string]int),
 		BlankLength:      make(map[string]int),
 		Options:          opts,
+		TargetFile:       "etc/passwd",
 		VulnerableParams: make(map[string]string),
 	}
 
