@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	"github.com/thomas-osgood/OGOR/misc/generators"
 )
@@ -123,6 +124,61 @@ func (l *LFIChecker) GetBadLength() (err error) {
 
 	// set BadLength variable.
 	l.BadLength = bodylen
+
+	return nil
+}
+
+// function designed to get the return length when a blank parameter is passed
+// to the target.
+func (l *LFIChecker) GetBlankLength() (err error) {
+	var bodycontent []byte
+	var bodylen int
+	var req *http.Request
+	var resp *http.Response
+	var targeturl string = fmt.Sprintf("%s/%s", l.Checker.baseurl, l.GoodRoute)
+	var params url.Values = url.Values{}
+
+	if len(l.Options.Parameters) < 1 {
+		return errors.New("no parameters to test")
+	}
+
+	// setup HTTP request to target.
+	req, err = http.NewRequest(http.MethodGet, targeturl, nil)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range l.Options.Parameters {
+		params.Set(k, v)
+	}
+
+	keys := make([]string, 0, len(l.Options.Parameters))
+	for k := range l.Options.Parameters {
+		keys = append(keys, k)
+	}
+
+	params.Set(l.Options.Parameters[keys[0]], "")
+
+	// make request to target.
+	resp, err = l.Checker.client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// read HTTP response.
+	//
+	// note, this does not check the return code because some sites
+	// do not return 404 Not Found when responding with an error message.
+	bodycontent, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	// get response length.
+	bodylen = len(bodycontent)
+
+	// set BadLength variable.
+	l.BlankLength = bodylen
 
 	return nil
 }

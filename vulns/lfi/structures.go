@@ -9,6 +9,10 @@ type LFIChecker struct {
 	// respone length of a known bad route
 	BadLength int
 
+	// response length for a blank parameter.
+	// this is only used when URL parameters are specified.
+	BlankLength int
+
 	// this is the HTTP client that will be conducting the
 	// requests to the target.
 	Checker LFIClient
@@ -52,7 +56,7 @@ type LFIOptions struct {
 	// is empty, no parameters will be tested.
 	//
 	// default: empty
-	Parameters []string
+	Parameters map[string]string
 
 	// switch indicating whether to use double URL encoding to attempt
 	// to evade directory traversal filters.

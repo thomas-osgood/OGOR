@@ -14,3 +14,12 @@ func UsingSSL(opt *LFIOptions) (err error) {
 	return nil
 }
 
+// function designed to add a parameter to the LFI
+// testing options. this will take in a param and
+// goodval (value that does not fail).
+func WithParameter(param string, goodval string) LFIOptsFunc {
+	return func(o *LFIOptions) error {
+		o.Parameters[param] = goodval
+		return nil
+	}
+}
