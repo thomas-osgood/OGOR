@@ -14,6 +14,10 @@ type LFIChecker struct {
 	// was executed.
 	BadLengthParams map[string]int
 
+	// a route that will return a "404 Not Found" response. this route
+	// will be used in various locations to check for LFI.
+	BadRoute string
+
 	// response length for a blank parameter.
 	// this is only used when URL parameters are specified.
 	BlankLength map[string]int
@@ -34,12 +38,17 @@ type LFIChecker struct {
 	// will be used in various locations.
 	GoodRoute string
 
-	// a route that will return a "404 Not Found" response. this route
-	// will be used in various locations to check for LFI.
-	BadRoute string
-
 	// LFI options associated with this checker
 	Options LFIOptions
+
+	// return length of a target file test (no param).
+	TestLength int
+
+	// return length of a target file test using a parameter.
+	TestLengthParams map[string]int
+
+	// slice holding the vulnerable parameters that have been discovered.
+	VulnerableParams map[string]string
 }
 
 // structure defining an LFIClient object that will be used
