@@ -16,7 +16,7 @@ type LFIChecker struct {
 
 	// response length for a blank parameter.
 	// this is only used when URL parameters are specified.
-	BlankLength int
+	BlankLength map[string]int
 
 	// this is the HTTP client that will be conducting the
 	// requests to the target.
