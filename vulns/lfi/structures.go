@@ -41,9 +41,6 @@ type LFIChecker struct {
 	// LFI options associated with this checker
 	Options LFIOptions
 
-	// file to target when testing for LFI
-	TargetFile string
-
 	// return length of a target file test (no param).
 	TestLength int
 
@@ -86,4 +83,7 @@ type LFIOptions struct {
 	//
 	// default: false
 	SSLConnection bool
+
+	// file to target when testing for LFI
+	TargetFile string
 }

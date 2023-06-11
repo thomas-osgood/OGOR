@@ -8,7 +8,7 @@ import "net/http"
 // nil and an error.
 func NewLFIChecker(baseurl string, usropts ...LFIOptsFunc) (checker *LFIChecker, err error) {
 	var client http.Client = http.Client{}
-	var opts LFIOptions = LFIOptions{Parameters: make(map[string]string), DoubleEncoding: false, SSLConnection: false}
+	var opts LFIOptions = LFIOptions{Parameters: make(map[string]string), DoubleEncoding: false, SSLConnection: false, TargetFile: "etc/passwd"}
 
 	// set any options passed in by the user.
 	for _, fnc := range usropts {
@@ -23,7 +23,6 @@ func NewLFIChecker(baseurl string, usropts ...LFIOptsFunc) (checker *LFIChecker,
 		BadLengthParams:  make(map[string]int),
 		BlankLength:      make(map[string]int),
 		Options:          opts,
-		TargetFile:       "etc/passwd",
 		VulnerableParams: make(map[string]string),
 	}
 

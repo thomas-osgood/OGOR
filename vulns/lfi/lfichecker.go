@@ -31,7 +31,7 @@ func (l *LFIChecker) CheckParameter(param string) (err error) {
 			traversestr = fmt.Sprintf("%s%s", traversestr, bypass)
 		}
 
-		params.Set(param, fmt.Sprintf("%s%s", traversestr, l.TargetFile))
+		params.Set(param, fmt.Sprintf("%s%s", traversestr, l.Options.TargetFile))
 
 		req, err = http.NewRequest(http.MethodGet, targeturl, nil)
 		if err != nil {
