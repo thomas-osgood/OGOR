@@ -10,6 +10,7 @@ import (
 	_ "github.com/thomas-osgood/OGOR/networking/ipgrabber"
 	_ "github.com/thomas-osgood/OGOR/networking/ipinfo"
 	_ "github.com/thomas-osgood/OGOR/output"
+	_ "github.com/thomas-osgood/OGOR/vulns/lfi"
 )
 
 func main() {
