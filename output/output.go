@@ -25,6 +25,7 @@ func (o *Outputter) CenterString(msg interface{}, n int) {
 }
 
 // function designed to print a given char "c", "n" number of times.
+// this appends a newline character to the end of the sequence.
 func (o *Outputter) PrintChar(char byte, n int) {
 	var outline string
 
@@ -35,7 +36,7 @@ func (o *Outputter) PrintChar(char byte, n int) {
 			outline = fmt.Sprintf("%s%s", outline, string(char))
 		}
 	}
-	fmt.Printf(outline)
+	fmt.Printf("%s\n", outline)
 
 	return
 }
