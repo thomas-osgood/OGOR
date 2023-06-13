@@ -2,6 +2,39 @@ package output
 
 import "fmt"
 
+// function designed to print a string in the center of a line with
+// a given length "n".
+//
+// currently, this includes non-printable characters in the length calculation.
+func (o *Outputter) CenterString(msg interface{}, n int) (formatted string) {
+	var indent_format string
+	var indent int
+	var msgstr string = fmt.Sprintf("%v", msg)
+
+	fmt.Printf("%s", CLEAR_LINE)
+	if len(msgstr) > n {
+		return fmt.Sprintf("%s\n", msgstr)
+	}
+
+	indent = (n - len(msgstr)) / 2
+	indent_format = fmt.Sprintf(INDENT_SEQ, indent)
+
+	return fmt.Sprintf("%s%s\n", indent_format, msg)
+}
+
+// function designed to print a given char "c", "n" number of times.
+func (o *Outputter) PrintChar(char byte, n int) (outline string) {
+	if n < 1 {
+		return ""
+	}
+
+	for i := 0; i < n; i++ {
+		outline = fmt.Sprintf("%s%s", outline, string(char))
+	}
+
+	return outline
+}
+
 // function designed to print a success message with the
 // format: [+] <message>
 func (o *Outputter) SucMsg(message interface{}) {
