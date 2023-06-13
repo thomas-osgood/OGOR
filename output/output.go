@@ -6,33 +6,38 @@ import "fmt"
 // a given length "n".
 //
 // currently, this includes non-printable characters in the length calculation.
-func (o *Outputter) CenterString(msg interface{}, n int) (formatted string) {
+func (o *Outputter) CenterString(msg interface{}, n int) {
 	var indent_format string
 	var indent int
 	var msgstr string = fmt.Sprintf("%v", msg)
 
 	fmt.Printf("%s", CLEAR_LINE)
 	if len(msgstr) > n {
-		return fmt.Sprintf("%s\n", msgstr)
+		fmt.Printf("%s\n", msgstr)
+	} else {
+		indent = (n - len(msgstr)) / 2
+		indent_format = fmt.Sprintf(INDENT_SEQ, indent)
+
+		fmt.Printf("%s%s\n", indent_format, msg)
 	}
 
-	indent = (n - len(msgstr)) / 2
-	indent_format = fmt.Sprintf(INDENT_SEQ, indent)
-
-	return fmt.Sprintf("%s%s\n", indent_format, msg)
+	return
 }
 
 // function designed to print a given char "c", "n" number of times.
-func (o *Outputter) PrintChar(char byte, n int) (outline string) {
+func (o *Outputter) PrintChar(char byte, n int) {
+	var outline string
+
 	if n < 1 {
-		return ""
+		outline = ""
+	} else {
+		for i := 0; i < n; i++ {
+			outline = fmt.Sprintf("%s%s", outline, string(char))
+		}
 	}
+	fmt.Printf(outline)
 
-	for i := 0; i < n; i++ {
-		outline = fmt.Sprintf("%s%s", outline, string(char))
-	}
-
-	return outline
+	return
 }
 
 // function designed to print a success message with the
