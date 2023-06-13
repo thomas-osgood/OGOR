@@ -31,3 +31,6 @@ var FAIL_SEQ string = fmt.Sprintf("%s[%s]%s", RED_L_SEQ, FAIL_CHR, ANSI_RESET)
 var WARNING_SEQ string = fmt.Sprintf("%s[%s]%s", YELLOW_L_SEQ, WARNING_CHR, ANSI_RESET)
 var INFO_SEQ string = fmt.Sprintf("%s[%s]%s", BLUE_L_SEQ, INFO_CHR, ANSI_RESET)
 var SYS_SEQ string = fmt.Sprintf("%s[%s]%s", YELLOW_L_SEQ, SYS_CHR, ANSI_RESET)
+
+// escape sequence used to indent n number of spaces "\x1b[%dC"
+var INDENT_SEQ string = fmt.Sprintf("%s%%dC", CSI)
