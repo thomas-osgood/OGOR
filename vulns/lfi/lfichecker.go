@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/thomas-osgood/OGOR/misc/generators"
 )
@@ -420,6 +421,43 @@ func (l *LFIChecker) GetGoodLength() (err error) {
 func (l *LFIChecker) SetBadRoute(route string) (err error) {
 	l.BadRoute = route
 	return nil
+}
+
+// private function designed to analyze the Checker's base url and
+// attempt to determine the file extension/type of the given file.
+// this can help determine if PHP filters should be tested, etc.
+func (l *LFIChecker) getfiletype() (filetype string, err error) {
+	var baselen int
+	var baseurl string
+	var splitlen int
+	var splitstring []string = []string{}
+
+	baseurl = l.Checker.baseurl
+	baselen = len(baseurl)
+	if baseurl[baselen-1] == '/' {
+		baseurl = baseurl[:baselen-1]
+	}
+
+	splitstring = strings.Split(baseurl, "?")
+	splitstring = strings.Split(splitstring[0], "/")
+
+	splitlen = len(splitstring)
+
+	splitstring = strings.Split(splitstring[splitlen-1], ".")
+
+	splitlen = len(splitstring)
+
+	// if the string split by "." does not have a length of 2 or greater,
+	// no file extension is present in the filename (eg: /index) and the
+	// file type cannot be determined using this function.
+	if splitlen < 2 {
+		return "", errors.New("page name does not have an extension")
+	}
+
+	// splitstring's last index will hold the file extension.
+	filetype = splitstring[splitlen-1]
+
+	return filetype, nil
 }
 
 // function designed to set the GoodRoute parameter in the LFIChecker object.
