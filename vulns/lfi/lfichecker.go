@@ -417,12 +417,6 @@ func (l *LFIChecker) GetGoodLength() (err error) {
 	return nil
 }
 
-// function designed to set the BadRoute parameter in the LFIChecker object.
-func (l *LFIChecker) SetBadRoute(route string) (err error) {
-	l.BadRoute = route
-	return nil
-}
-
 // private function designed to analyze the Checker's base url and
 // attempt to determine the file extension/type of the given file.
 // this can help determine if PHP filters should be tested, etc.
@@ -434,15 +428,20 @@ func (l *LFIChecker) getfiletype() (filetype string, err error) {
 
 	baseurl = l.Checker.baseurl
 	baselen = len(baseurl)
+
+	// remove trailing "/" from url
 	if baseurl[baselen-1] == '/' {
 		baseurl = baseurl[:baselen-1]
 	}
 
+	// disregard all URL parameters and focus on the http(s)://... piece,
+	// then split it by "/" to separate the scheme, domain, route, page.
 	splitstring = strings.Split(baseurl, "?")
 	splitstring = strings.Split(splitstring[0], "/")
 
 	splitlen = len(splitstring)
 
+	// split the page by "." to separate the page name from the file extension.
 	splitstring = strings.Split(splitstring[splitlen-1], ".")
 
 	splitlen = len(splitstring)
@@ -458,6 +457,12 @@ func (l *LFIChecker) getfiletype() (filetype string, err error) {
 	filetype = splitstring[splitlen-1]
 
 	return filetype, nil
+}
+
+// function designed to set the BadRoute parameter in the LFIChecker object.
+func (l *LFIChecker) SetBadRoute(route string) (err error) {
+	l.BadRoute = route
+	return nil
 }
 
 // function designed to set the GoodRoute parameter in the LFIChecker object.
