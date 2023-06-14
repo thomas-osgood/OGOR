@@ -31,6 +31,12 @@ func (l *LFIChecker) CheckParameter(param string) (err error) {
 			traversestr = fmt.Sprintf("%s%s", traversestr, bypass)
 		}
 
+		// set all parameter values
+		for k, v := range l.Options.Parameters {
+			params.Set(k, v)
+		}
+
+		// poison parameter value to test
 		params.Set(param, fmt.Sprintf("%s%s", traversestr, l.Options.TargetFile))
 
 		req, err = http.NewRequest(http.MethodGet, targeturl, nil)
