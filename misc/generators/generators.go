@@ -22,7 +22,7 @@ func GenRandomName(minlen int, maxlen int) (randstr string, err error) {
 		return "", errors.New("min length must be less than or equal to max length")
 	}
 
-	rand.Seed(time.Now().UnixMilli())
+	rand.Seed(time.Now().UnixMicro())
 
 	length = minlen + rand.Intn(maxlen-minlen)
 
