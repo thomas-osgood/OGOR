@@ -26,6 +26,15 @@ func MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 	}
 }
 
+// function designed to create and return a new MiddlwareController object
+// to the user. this will return a pointer to the new MiddlwareController
+// and an error. if the creation is successful, nil will be returned in
+// place of an error.
+func NewMiddlwareController() (mc *MiddlewareController, err error) {
+	mc = &MiddlewareController{}
+	return mc, nil
+}
+
 // function designed to return an error JSON payload to the client.
 // this can be passed to MakeHTTPHandleFunc and used if/when an
 // issue occurs during the execution of an API endpoint.
