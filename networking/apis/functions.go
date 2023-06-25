@@ -13,7 +13,7 @@ import (
 // this is, essentially, a middleware controller that extends the
 // HandleFunc function. this takes an APIFunc as an argument and
 // processes it.
-func makeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
+func MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error = fnc(w, r)
 		if err != nil {
@@ -31,7 +31,7 @@ func makeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 // if there is an issue encountered while encoding the
 // JSON payload, the error will be returned, otherwise
 // nil will be returned.
-func writeJSON(w http.ResponseWriter, status int, v any) (err error) {
+func WriteJSON(w http.ResponseWriter, status int, v any) (err error) {
 	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
 	return json.NewEncoder(w).Encode(v)
