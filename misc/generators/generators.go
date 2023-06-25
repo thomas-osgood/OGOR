@@ -24,7 +24,7 @@ func GenRandomName(minlen int, maxlen int) (randstr string, err error) {
 
 	rand.Seed(time.Now().UnixMilli())
 
-	length = rand.Intn(minlen + (maxlen - minlen))
+	length = minlen + rand.Intn(maxlen-minlen)
 
 	randstr = ""
 
