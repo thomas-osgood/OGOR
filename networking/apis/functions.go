@@ -28,7 +28,7 @@ func MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 // function designed to return an error JSON payload to the client.
 // this can be passed to MakeHTTPHandleFunc and used if/when an
 // issue occurs during the execution of an API endpoint.
-func ReturnErrorJSON(w http.ResponseWriter, status int, message string) (err error) {
+func ReturnErrorJSON(w *http.ResponseWriter, status int, message string) (err error) {
 	var payload ErrorStruct = ErrorStruct{}
 
 	payload.ErrorCode = status
@@ -43,8 +43,8 @@ func ReturnErrorJSON(w http.ResponseWriter, status int, message string) (err err
 // if there is an issue encountered while encoding the
 // JSON payload, the error will be returned, otherwise
 // nil will be returned.
-func WriteJSON(w http.ResponseWriter, status int, v any) (err error) {
-	w.WriteHeader(status)
-	w.Header().Set("Content-Type", "application/json")
-	return json.NewEncoder(w).Encode(v)
+func WriteJSON(w *http.ResponseWriter, status int, v any) (err error) {
+	(*w).WriteHeader(status)
+	(*w).Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(*w).Encode(v)
 }
