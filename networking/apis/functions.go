@@ -6,6 +6,7 @@ package apis
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -34,7 +35,7 @@ func ReturnErrorJSON(w *http.ResponseWriter, status int, message string) (err er
 	payload.ErrorCode = status
 	payload.ErrorMessage = message
 
-	return WriteJSON(w, status, payload)
+	return WriteJSON(w, status, &payload)
 }
 
 // function designed to handle writing a JSON payload to
@@ -44,7 +45,14 @@ func ReturnErrorJSON(w *http.ResponseWriter, status int, message string) (err er
 // JSON payload, the error will be returned, otherwise
 // nil will be returned.
 func WriteJSON(w *http.ResponseWriter, status int, v any) (err error) {
-	(*w).WriteHeader(status)
+	var contentlength int
+
+	(*w).Header().Set("Status-Code", fmt.Sprintf("%d", status))
 	(*w).Header().Set("Content-Type", "application/json")
+
+	contentlength = len(fmt.Sprintf("%v", v))
+
+	(*w).Header().Set("Content-Length", fmt.Sprintf("%d", contentlength))
+
 	return json.NewEncoder(*w).Encode(v)
 }
