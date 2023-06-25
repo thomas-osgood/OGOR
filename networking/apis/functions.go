@@ -18,8 +18,8 @@ func MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error = fnc(w, r)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Header().Set("Content-Type", "application/text")
+			w.Header().Set("Status-Code", fmt.Sprintf("%d", http.StatusBadRequest))
+			w.Header().Set("Content-Type", "text/plain")
 			w.Write([]byte(err.Error()))
 			return
 		}
@@ -45,14 +45,7 @@ func ReturnErrorJSON(w *http.ResponseWriter, status int, message string) (err er
 // JSON payload, the error will be returned, otherwise
 // nil will be returned.
 func WriteJSON(w *http.ResponseWriter, status int, v any) (err error) {
-	var contentlength int
-
 	(*w).Header().Set("Status-Code", fmt.Sprintf("%d", status))
 	(*w).Header().Set("Content-Type", "application/json")
-
-	contentlength = len(fmt.Sprintf("%v", v))
-
-	(*w).Header().Set("Content-Length", fmt.Sprintf("%d", contentlength))
-
 	return json.NewEncoder(*w).Encode(v)
 }
