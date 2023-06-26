@@ -30,8 +30,19 @@ func MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 // to the user. this will return a pointer to the new MiddlwareController
 // and an error. if the creation is successful, nil will be returned in
 // place of an error.
-func NewMiddlwareController() (mc *MiddlewareController, err error) {
-	mc = &MiddlewareController{}
+func NewMiddlwareController(optsfuncs ...MiddlewareOptsFunc) (mc *MiddlewareController, err error) {
+	var mo MiddlewareOptions = MiddlewareOptions{Logging: false}
+
+	mc = &MiddlewareController{options: mo}
+
+	// loop through MiddlewareOptsFuncs passed in and process them.
+	for _, fnc := range optsfuncs {
+		fnc(&mo)
+	}
+
+	// set logging flag after option functions have been processed.
+	mc.options.Logging = mo.Logging
+
 	return mc, nil
 }
 
@@ -45,6 +56,13 @@ func ReturnErrorJSON(w *http.ResponseWriter, status int, message string) (err er
 	payload.ErrorMessage = message
 
 	return WriteJSON(w, status, &payload)
+}
+
+// function designed to set the Logging flag of a MiddlewareOptions object.
+// this will set the Logging variable to true.
+func WithLogging(mo *MiddlewareOptions) (err error) {
+	mo.Logging = true
+	return nil
 }
 
 // function designed to handle writing a JSON payload to

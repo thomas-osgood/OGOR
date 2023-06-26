@@ -25,4 +25,15 @@ type MiddlewareController struct {
 	// that all endpoints require and not meant to be specific
 	// to a single endpoint.
 	RequiredHeaders []string
+
+	// object holding the various options/configuration associated
+	// with the current instance of the MiddlewareController.
+	options MiddlewareOptions
+}
+
+// strucuture designed to hold the various options available
+// for a MiddlewareController.
+type MiddlewareOptions struct {
+	// flag to set logging on/off
+	Logging bool
 }
