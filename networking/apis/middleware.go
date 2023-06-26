@@ -2,6 +2,9 @@ package apis
 
 import (
 	"errors"
+	"fmt"
+	"log"
+	"net/http"
 	"strings"
 )
 
@@ -30,4 +33,27 @@ func (mc *MiddlewareController) Blacklisted(ipaddr string) (err error) {
 	}
 
 	return nil
+}
+
+// function designed to more elegantly handle HTTP routing functions.
+// this is, essentially, a middleware controller that extends the
+// HandleFunc function. this takes an APIFunc as an argument and
+// processes it.
+func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var err error = fnc(w, r)
+
+		// if logging is turned on, log the current request. this
+		// prints out the Method, Remote Address, and URL.
+		if mc.options.Logging {
+			log.Printf("\"%s\" request from \"%s\" to \"%s\"", r.Method, r.RemoteAddr, r.URL.RequestURI())
+		}
+
+		if err != nil {
+			w.Header().Set("Status-Code", fmt.Sprintf("%d", http.StatusBadRequest))
+			w.Header().Set("Content-Type", "text/plain")
+			w.Write([]byte(err.Error()))
+			return
+		}
+	}
 }
