@@ -41,13 +41,24 @@ func (mc *MiddlewareController) Blacklisted(ipaddr string) (err error) {
 // processes it.
 func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var err error = fnc(w, r)
+		var err error
+
+		// make sure the address making the request is not in the blacklist.
+		err = mc.Blacklisted(r.RemoteAddr)
+		if err != nil {
+			log.Printf("denied blacklisted address: \"%s\"\n", r.RemoteAddr)
+			log.Printf("\tmethod: \"%s\"\n", r.Method)
+			log.Printf("\turi: \"%s\"\n", r.RequestURI)
+		}
 
 		// if logging is turned on, log the current request. this
 		// prints out the Method, Remote Address, and URL.
 		if mc.options.Logging {
-			log.Printf("\"%s\" request from \"%s\" to \"%s\"", r.Method, r.RemoteAddr, r.URL.RequestURI())
+			log.Printf("\"%s\" request from \"%s\" to \"%s\"\n", r.Method, r.RemoteAddr, r.URL.RequestURI())
 		}
+
+		// process request
+		err = fnc(w, r)
 
 		if err != nil {
 			w.Header().Set("Status-Code", fmt.Sprintf("%d", http.StatusBadRequest))
