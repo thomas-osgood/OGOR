@@ -32,7 +32,9 @@ func init() {
 		return
 	}
 
-	err = windows.SetConsoleMode(hdl, windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+	*mode |= windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING | windows.ENABLE_PROCESSED_OUTPUT
+
+	err = windows.SetConsoleMode(hdl, *mode)
 	if err != nil {
 		fmt.Printf("[-][OUTPUTINIT] %s\n", err.Error())
 		VTP = false
