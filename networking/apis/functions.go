@@ -74,5 +74,6 @@ func WithLogging(mo *MiddlewareOptions) (err error) {
 func WriteJSON(w *http.ResponseWriter, status int, v any) (err error) {
 	(*w).Header().Set("Status-Code", fmt.Sprintf("%d", status))
 	(*w).Header().Set("Content-Type", "application/json")
+	(*w).WriteHeader(status)
 	return json.NewEncoder(*w).Encode(v)
 }
