@@ -18,4 +18,5 @@ type Fingerprinter struct {
 	// with by the person importing/using this module.
 
 	allowedmethods []string
+	servertype     string
 }
