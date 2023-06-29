@@ -61,3 +61,27 @@ func (f *Fingerprinter) GetAllowedMethods() (err error) {
 
 	return nil
 }
+
+// function designed to acquire the type of server hosting the target
+// by making a request to the target and analyzing the headers that
+// get returned.
+func (f *Fingerprinter) GetServerType() (err error) {
+	var client http.Client = http.Client{}
+	var resp *http.Response
+	var serverheader string
+
+	resp, err = client.Get(f.Target)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	serverheader = strings.Trim(resp.Header.Get("server"), " ")
+	if len(serverheader) < 1 {
+		serverheader = "unknown"
+	}
+
+	f.servertype = serverheader
+
+	return nil
+}
