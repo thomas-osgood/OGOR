@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/netip"
 	"strings"
@@ -20,7 +21,12 @@ func (mc *MiddlewareController) Blacklisted(ipaddr string) (err error) {
 	var netaddr netip.Addr
 	var testaddr string
 
-	netaddr, err = netip.ParseAddr(ipaddr)
+	testaddr, _, err = net.SplitHostPort(ipaddr)
+	if err != nil {
+		return err
+	}
+
+	netaddr, err = netip.ParseAddr(testaddr)
 	if err != nil {
 		return err
 	}
