@@ -45,10 +45,11 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 
 		// make sure the address making the request is not in the blacklist.
 		err = mc.Blacklisted(r.RemoteAddr)
-		if err != nil {
+		if err == nil {
 			log.Printf("denied blacklisted address: \"%s\"\n", r.RemoteAddr)
 			log.Printf("\tmethod: \"%s\"\n", r.Method)
 			log.Printf("\turi: \"%s\"\n", r.RequestURI)
+			return
 		}
 
 		// if logging is turned on, log the current request. this
