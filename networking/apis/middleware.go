@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/netip"
 	"strings"
 )
 
@@ -16,7 +17,14 @@ import (
 // the address comparison is case-insensitive.
 func (mc *MiddlewareController) Blacklisted(ipaddr string) (err error) {
 	var found bool = false
-	var testaddr string = strings.ToLower(ipaddr)
+	var netaddr netip.Addr
+	var testaddr string
+
+	netaddr, err = netip.ParseAddr(ipaddr)
+	if err != nil {
+		return err
+	}
+	testaddr = netaddr.String()
 
 	// loop through blacklist and check given address against each value.
 	for _, badaddr := range mc.AddressBlacklist {
@@ -49,6 +57,10 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 			log.Printf("denied blacklisted address: \"%s\"\n", r.RemoteAddr)
 			log.Printf("\tmethod: \"%s\"\n", r.Method)
 			log.Printf("\turi: \"%s\"\n", r.RequestURI)
+			return
+		} else if err.Error() != "address not found in blacklist." {
+			log.Printf("error checking blacklist: %s\n", err.Error())
+			log.Printf("denying request...")
 			return
 		}
 
