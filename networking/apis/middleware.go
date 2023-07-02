@@ -88,9 +88,12 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 		// process request
 		err = fnc(w, r)
 
+		// there was an error processing the request. return a plaint text
+		// response showing the error.
 		if err != nil {
 			w.Header().Set("Status-Code", fmt.Sprintf("%d", http.StatusBadRequest))
 			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
 			return
 		}
