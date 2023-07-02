@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -58,7 +59,16 @@ func WithTimeout(duration float64) EnumOptsFunc {
 
 // opts func to specify the wordlist to use during enumeration.
 func WithWordlist(wordlist string) EnumOptsFunc {
-	return func(eo *EnumOpts) error {
+	return func(eo *EnumOpts) (err error) {
+		var fptr *os.File
+
+		// make sure the file exists before assigning it.
+		fptr, err = os.Open(wordlist)
+		if err != nil {
+			return err
+		}
+		defer fptr.Close()
+
 		eo.Wordlist = wordlist
 		return nil
 	}
