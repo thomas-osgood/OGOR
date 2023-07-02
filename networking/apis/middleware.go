@@ -66,8 +66,17 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 			return
 		} else if err.Error() != "address not found in blacklist." {
 			log.Printf("error checking blacklist: %s\n", err.Error())
-			log.Printf("denying request...")
+			log.Printf("denying request...\n")
 			return
+		}
+
+		// make sure the user requesting the endpoint is authorized.
+		if mc.AuthorizationFunction != nil {
+			err = mc.AuthorizationFunction(r)
+			if err != nil {
+				log.Printf("unautorized request from \"%s\" to \"%s\" blocked\n", r.RemoteAddr, r.RequestURI)
+				return
+			}
 		}
 
 		// if logging is turned on, log the current request. this

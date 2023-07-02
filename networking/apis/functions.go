@@ -33,7 +33,7 @@ func MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 func NewMiddlwareController(optsfuncs ...MiddlewareOptsFunc) (mc *MiddlewareController, err error) {
 	var mo MiddlewareOptions = MiddlewareOptions{Logging: false}
 
-	mc = &MiddlewareController{options: mo}
+	mc = &MiddlewareController{options: mo, AuthorizationFunction: nil}
 
 	// loop through MiddlewareOptsFuncs passed in and process them.
 	for _, fnc := range optsfuncs {
@@ -42,6 +42,7 @@ func NewMiddlwareController(optsfuncs ...MiddlewareOptsFunc) (mc *MiddlewareCont
 
 	// set logging flag after option functions have been processed.
 	mc.options.Logging = mo.Logging
+	mc.AuthorizationFunction = mo.AuthorizationFunction
 
 	return mc, nil
 }
@@ -56,6 +57,16 @@ func ReturnErrorJSON(w *http.ResponseWriter, status int, message string) (err er
 	payload.ErrorMessage = message
 
 	return WriteJSON(w, status, &payload)
+}
+
+// function designed to set the authorization function of a MiddlewareOptions
+// object. this will be assigned to the MiddlewareController that processes
+// the MiddlewareOptions struct.
+func WithAuthorization(af AuthFunc) MiddlewareOptsFunc {
+	return func(mo *MiddlewareOptions) error {
+		mo.AuthorizationFunction = af
+		return nil
+	}
 }
 
 // function designed to set the Logging flag of a MiddlewareOptions object.

@@ -20,6 +20,10 @@ type MiddlewareController struct {
 	// can be used to restrict who can contact the API.
 	AddressBlacklist []string
 
+	// authorization function (if any) to be used by the
+	// middleware to restrict access to the endpoints.
+	AuthorizationFunction AuthFunc
+
 	// slice holding all the headers reuqired for a request to
 	// be properly handled by the API. this is meant to be a list
 	// that all endpoints require and not meant to be specific
@@ -34,6 +38,11 @@ type MiddlewareController struct {
 // strucuture designed to hold the various options available
 // for a MiddlewareController.
 type MiddlewareOptions struct {
+
+	// authorization function (if any) to be used by the
+	// middleware to restrict access to the endpoints.
+	AuthorizationFunction AuthFunc
+
 	// flag to set logging on/off
 	Logging bool
 }
