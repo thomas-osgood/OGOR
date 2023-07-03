@@ -267,3 +267,32 @@ func (grabber *IPGrabber) ListIFaces() (err error) {
 
 	return nil
 }
+
+// function designed to return the first non-loopback interface
+// from the Interfaces slice. if there is an error or no non-loopback
+// interface is discovered an error will be returned, otherwise the
+// interface name and nil will be returned.
+func (grabber *IPGrabber) GetFirstNonLoop() (iface string, err error) {
+	var found bool = false
+	var idx int
+
+	// loop through discovered interfaces and search for first
+	// non-loopback interface.
+	for idx = range grabber.Interfaces {
+
+		// check for loopback flag in current interface.
+		if (grabber.Interfaces[idx].Flags & net.FlagLoopback) == 0 {
+			iface = grabber.Interfaces[idx].Name
+			found = true
+			break
+		}
+
+	}
+
+	// check found flag to see if non-loopback interface discovered.
+	if !found {
+		return "", errors.New("no non-loopback interfaces discovered.")
+	}
+
+	return iface, nil
+}
