@@ -75,6 +75,12 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 			err = mc.AuthorizationFunction(r)
 			if err != nil {
 				log.Printf("unautorized request from \"%s\" to \"%s\" blocked\n", r.RemoteAddr, r.RequestURI)
+				err = ReturnErrorJSON(&w, http.StatusUnauthorized, "unauthorized")
+				if err != nil {
+					w.Header().Set("Content-Type", "text/plain")
+					w.WriteHeader(http.StatusUnauthorized)
+					w.Write([]byte("unauthorized"))
+				}
 				return
 			}
 		}
