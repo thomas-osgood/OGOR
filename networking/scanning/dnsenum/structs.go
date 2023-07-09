@@ -37,6 +37,11 @@ type Enumerator struct {
 	// in between requests. defaults to 0.
 	delay int
 
+	// flag indicating whether to use the printer during
+	// enumeration. if false, no output will be presented
+	// to the user.
+	display bool
+
 	// specify HTTPS for testing.
 	https bool
 
@@ -49,6 +54,11 @@ type EnumOpts struct {
 	// max number of milliseconds a thread should wait
 	// in between requests.
 	Delay int
+
+	// flag indicating whether to use the printer during
+	// enumeration. if false, no output will be presented
+	// to the user.
+	Display bool
 
 	// specified if the user wants the enumerator to
 	// use an existing HTTP client. this will override

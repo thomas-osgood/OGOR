@@ -153,14 +153,22 @@ func (e *Enumerator) vhostWorker(comms *chan string, wgrp *sync.WaitGroup) (err 
 
 	for subdomain = range *comms {
 		target = fmt.Sprintf("%s.%s", subdomain, e.TLD)
-		e.printer.SysMsgNB(fmt.Sprintf("testing %s", target))
+
+		if e.display {
+			e.printer.SysMsgNB(fmt.Sprintf("testing %s", target))
+		}
+
 		err = e.TestSubdomainHead(target, e.https)
 		if err != nil {
 			time.Sleep(delay)
 			continue
 		}
 		e.Discovered = append(e.Discovered, target)
-		e.printer.SucMsg(target)
+
+		if e.display {
+			e.printer.SucMsg(target)
+		}
+
 		time.Sleep(delay)
 	}
 
