@@ -52,14 +52,17 @@ func (mc *MiddlewareController) Blacklisted(ipaddr string) (err error) {
 // function designed to log a middleware event.
 func (mc *MiddlewareController) LogEvent(message string, severity int) {
 
-	// set text color based on the severity of the event.
-	switch severity {
-	case EVENT_ERROR:
-		message = mc.formatter.RedText(message)
-	case EVENT_SUCCESS:
-		message = mc.formatter.GreenText(message)
-	default:
-		message = mc.formatter.BlueText(message)
+	// set text color based on the severity of the event if
+	// coloring flag is set.
+	if mc.options.Coloring {
+		switch severity {
+		case EVENT_ERROR:
+			message = mc.formatter.RedText(message)
+		case EVENT_SUCCESS:
+			message = mc.formatter.GreenText(message)
+		default:
+			message = mc.formatter.BlueText(message)
+		}
 	}
 
 	// output event message.
@@ -93,7 +96,7 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 		if mc.AuthorizationFunction != nil {
 			err = mc.AuthorizationFunction(r)
 			if err != nil {
-				log.Printf("unauthorized request from \"%s\" to \"%s\" blocked", r.RemoteAddr, r.RequestURI)
+				mc.LogEvent(fmt.Sprintf("unauthorized request from \"%s\" to \"%s\" blocked", r.RemoteAddr, r.RequestURI), EVENT_ERROR)
 				err = ReturnErrorJSON(&w, http.StatusUnauthorized, "unauthorized")
 				if err != nil {
 					w.Header().Set("Content-Type", "text/plain")
@@ -116,6 +119,10 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 		// there was an error processing the request. return a plaint text
 		// response showing the error.
 		if err != nil {
+			if mc.options.Logging {
+				mc.LogEvent(fmt.Sprintf("error processing request: %s", err.Error()), EVENT_ERROR)
+			}
+
 			w.Header().Set("Status-Code", fmt.Sprintf("%d", http.StatusBadRequest))
 			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusBadRequest)
