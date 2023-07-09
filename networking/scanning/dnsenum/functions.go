@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
+
+	"github.com/thomas-osgood/OGOR/output"
 )
 
 // function designed to create an initialize a DNS
@@ -15,9 +16,9 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 		return nil, errors.New("invalid TLD passed in")
 	}
 
-	var options EnumOpts = EnumOpts{ExistingClient: nil, TestHeader: false, Wordlist: "subdomains.txt", Timeout: 10}
+	var options EnumOpts = EnumOpts{ExistingClient: nil, TestHeader: false, Wordlist: "subdomains.txt", Timeout: 10, Https: false}
 
-	enumerator = &Enumerator{TLD: tld}
+	enumerator = &Enumerator{TLD: tld, Discovered: []string{}}
 
 	// loop through EnumOptsFuncs passed in and
 	// set user-defined values.
@@ -39,6 +40,13 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 	enumerator.TestHeader = options.TestHeader
 	enumerator.Wordlist = options.Wordlist
 
+	enumerator.https = options.Https
+
+	enumerator.printer, err = output.NewOutputter()
+	if err != nil {
+		return nil, err
+	}
+
 	return enumerator, nil
 }
 
@@ -46,6 +54,13 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 // the subdomain value in the Host header during enumeration.
 func UseHeader(eo *EnumOpts) error {
 	eo.TestHeader = true
+	return nil
+}
+
+// opts func to set the HTTPS flag, indicating to use HTTPS
+// when enumerating subdomains for the target.
+func WithHTTPS(eo *EnumOpts) error {
+	eo.Https = true
 	return nil
 }
 
@@ -59,16 +74,7 @@ func WithTimeout(duration float64) EnumOptsFunc {
 
 // opts func to specify the wordlist to use during enumeration.
 func WithWordlist(wordlist string) EnumOptsFunc {
-	return func(eo *EnumOpts) (err error) {
-		var fptr *os.File
-
-		// make sure the file exists before assigning it.
-		fptr, err = os.Open(wordlist)
-		if err != nil {
-			return err
-		}
-		defer fptr.Close()
-
+	return func(eo *EnumOpts) error {
 		eo.Wordlist = wordlist
 		return nil
 	}

@@ -1,6 +1,10 @@
 package dnsenum
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/thomas-osgood/OGOR/output"
+)
 
 // structure designed to represent a DNS enumerator.
 // this will hold all the necessary information for
@@ -10,6 +14,9 @@ type Enumerator struct {
 	// HTTP client that will make a request to the
 	// top-level domain and test for subdomains.
 	Client *http.Client
+
+	// slice containing the discovered subdomains.
+	Discovered []string
 
 	// flag indicating whether the enumerator should test
 	// the domain using "Host: <subdomain>" to search
@@ -25,6 +32,12 @@ type Enumerator struct {
 	// wordlist to use for enumeration. this defaults
 	// to subdomains.txt.
 	Wordlist string
+
+	// specify HTTPS for testing.
+	https bool
+
+	// object used to output data.
+	printer *output.Outputter
 }
 
 type EnumOpts struct {
@@ -33,6 +46,9 @@ type EnumOpts struct {
 	// use an existing HTTP client. this will override
 	// the client defined in the Enuerator struct.
 	ExistingClient *http.Client
+
+	// specify HTTPS for testing
+	Https bool
 
 	// flag indicating whether the enumerator should test
 	// the domain using "Host: <subdomain>" to search
