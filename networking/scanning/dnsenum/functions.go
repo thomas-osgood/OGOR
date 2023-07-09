@@ -16,7 +16,7 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 		return nil, errors.New("invalid TLD passed in")
 	}
 
-	var options EnumOpts = EnumOpts{ExistingClient: nil, TestHeader: false, Wordlist: "subdomains.txt", Timeout: 10, Https: false, Delay: 0}
+	var options EnumOpts = EnumOpts{ExistingClient: nil, TestHeader: false, Wordlist: "subdomains.txt", Timeout: 10, Https: false, Delay: 0, Display: false}
 
 	enumerator = &Enumerator{TLD: tld, Discovered: []string{}}
 
@@ -41,6 +41,7 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 	enumerator.Wordlist = options.Wordlist
 
 	enumerator.delay = options.Delay
+	enumerator.display = options.Display
 	enumerator.https = options.Https
 
 	enumerator.printer, err = output.NewOutputter()
@@ -49,6 +50,14 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 	}
 
 	return enumerator, nil
+}
+
+// function designed to set the display flag, indicating to
+// show the enumeration results as it is happening. this will
+// display output using the enumerator's Outputter object.
+func ShowOutput(eo *EnumOpts) error {
+	eo.Display = true
+	return nil
 }
 
 // opts func to set the TestHeader flag, indicating to place
