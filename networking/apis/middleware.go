@@ -49,6 +49,25 @@ func (mc *MiddlewareController) Blacklisted(ipaddr string) (err error) {
 	return nil
 }
 
+// function designed to log a middleware event.
+func (mc *MiddlewareController) LogEvent(message string, severity int) {
+
+	// set text color based on the severity of the event.
+	switch severity {
+	case EVENT_ERROR:
+		message = mc.formatter.RedText(message)
+	case EVENT_SUCCESS:
+		message = mc.formatter.GreenText(message)
+	default:
+		message = mc.formatter.BlueText(message)
+	}
+
+	// output event message.
+	log.Printf("%s\n", message)
+
+	return
+}
+
 // function designed to more elegantly handle HTTP routing functions.
 // this is, essentially, a middleware controller that extends the
 // HandleFunc function. this takes an APIFunc as an argument and
@@ -60,13 +79,13 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 		// make sure the address making the request is not in the blacklist.
 		err = mc.Blacklisted(r.RemoteAddr)
 		if err == nil {
-			log.Printf("denied blacklisted address: \"%s\"\n", r.RemoteAddr)
-			log.Printf("\tmethod: \"%s\"\n", r.Method)
-			log.Printf("\turi: \"%s\"\n", r.RequestURI)
+			mc.LogEvent(fmt.Sprintf("denied blacklisted address: \"%s\"", r.RemoteAddr), EVENT_ERROR)
+			mc.LogEvent(fmt.Sprintf("\tmethod: \"%s\"", r.Method), EVENT_ERROR)
+			mc.LogEvent(fmt.Sprintf("\turi: \"%s\"", r.RequestURI), EVENT_ERROR)
 			return
 		} else if err.Error() != "address not found in blacklist." {
-			log.Printf("error checking blacklist: %s\n", err.Error())
-			log.Printf("denying request...\n")
+			mc.LogEvent(fmt.Sprintf("error checking blacklist: %s", err.Error()), EVENT_ERROR)
+			mc.LogEvent("denying request...", EVENT_ERROR)
 			return
 		}
 
@@ -74,7 +93,7 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 		if mc.AuthorizationFunction != nil {
 			err = mc.AuthorizationFunction(r)
 			if err != nil {
-				log.Printf("unauthorized request from \"%s\" to \"%s\" blocked\n", r.RemoteAddr, r.RequestURI)
+				log.Printf("unauthorized request from \"%s\" to \"%s\" blocked", r.RemoteAddr, r.RequestURI)
 				err = ReturnErrorJSON(&w, http.StatusUnauthorized, "unauthorized")
 				if err != nil {
 					w.Header().Set("Content-Type", "text/plain")
@@ -88,7 +107,7 @@ func (mc *MiddlewareController) MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc
 		// if logging is turned on, log the current request. this
 		// prints out the Method, Remote Address, and URL.
 		if mc.options.Logging {
-			log.Printf("\"%s\" request from \"%s\" to \"%s\"\n", r.Method, r.RemoteAddr, r.URL.RequestURI())
+			mc.LogEvent(fmt.Sprintf("\"%s\" request from \"%s\" to \"%s\"", r.Method, r.RemoteAddr, r.URL.RequestURI()), EVENT_INFO)
 		}
 
 		// process request

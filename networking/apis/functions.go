@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/thomas-osgood/OGOR/output"
 )
 
 // function designed to more elegantly handle HTTP routing functions.
@@ -31,14 +33,22 @@ func MakeHTTPHandleFunc(fnc APIFunc) http.HandlerFunc {
 // and an error. if the creation is successful, nil will be returned in
 // place of an error.
 func NewMiddlwareController(optsfuncs ...MiddlewareOptsFunc) (mc *MiddlewareController, err error) {
-	var mo MiddlewareOptions = MiddlewareOptions{Logging: false}
+	var formatter *output.Formatter
+	var mo MiddlewareOptions = MiddlewareOptions{Logging: false, Coloring: false}
 
-	mc = &MiddlewareController{options: mo, AuthorizationFunction: nil}
+	mc = &MiddlewareController{options: mo, AuthorizationFunction: nil, formatter: nil}
 
 	// loop through MiddlewareOptsFuncs passed in and process them.
 	for _, fnc := range optsfuncs {
 		fnc(&mo)
 	}
+
+	// create formatter object to assign to controller.
+	formatter, err = output.NewFormatter()
+	if err != nil {
+		return nil, err
+	}
+	mc.formatter = formatter
 
 	// set logging flag after option functions have been processed.
 	mc.options.Logging = mo.Logging
@@ -73,6 +83,14 @@ func WithAuthorization(af AuthFunc) MiddlewareOptsFunc {
 // this will set the Logging variable to true.
 func WithLogging(mo *MiddlewareOptions) (err error) {
 	mo.Logging = true
+	return nil
+}
+
+// function designed to set the Coloring flag of a MiddlewareOptions object.
+// this will set the Coloring variable to true. when the flag is set, the
+// output will change color based on the severity of the event.
+func WithColoring(mo *MiddlewareOptions) (err error) {
+	mo.Coloring = true
 	return nil
 }
 

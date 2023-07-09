@@ -1,5 +1,7 @@
 package apis
 
+import "github.com/thomas-osgood/OGOR/output"
+
 // struct designed to represent a JSON error return that can
 // be used to deliver information about an error that has been
 // thrown during execution of an API/Server function.
@@ -33,6 +35,10 @@ type MiddlewareController struct {
 	// object holding the various options/configuration associated
 	// with the current instance of the MiddlewareController.
 	options MiddlewareOptions
+
+	// formatting object attached to the MiddlewareController. this
+	// will be used by the logging functionality of the controller.
+	formatter *output.Formatter
 }
 
 // strucuture designed to hold the various options available
@@ -45,4 +51,7 @@ type MiddlewareOptions struct {
 
 	// flag to set logging on/off
 	Logging bool
+
+	// flag to set coloring for logging output.
+	Coloring bool
 }
