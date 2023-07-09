@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/thomas-osgood/OGOR/misc/generators"
 )
@@ -124,22 +126,42 @@ func (e *Enumerator) TestSubdomainHead(subdomain string, https bool) (err error)
 	return nil
 }
 
+// function designed to calculate a delay based on the max allowed
+// delay of the enumerator.
+func (e *Enumerator) calculateDelay() (delay time.Duration, err error) {
+	if e.delay > 0 {
+		rand.Seed(time.Now().UnixMicro())
+		delay = time.Duration(rand.Intn(e.delay)) * time.Millisecond
+	} else {
+		delay = 0
+	}
+	return delay, nil
+}
+
 // function designed to be a worker thread for the VHost enumeration.
 // this will return nil if no errors occur during testing, otherwise
 // and error is returned.
 func (e *Enumerator) vhostWorker(comms *chan string, wgrp *sync.WaitGroup) (err error) {
 	var subdomain string
 	var target string
+	var delay time.Duration
+
+	delay, err = e.calculateDelay()
+	if err != nil {
+		return err
+	}
 
 	for subdomain = range *comms {
 		target = fmt.Sprintf("%s.%s", subdomain, e.TLD)
 		e.printer.SysMsgNB(fmt.Sprintf("testing %s", target))
 		err = e.TestSubdomainHead(target, e.https)
 		if err != nil {
+			time.Sleep(delay)
 			continue
 		}
 		e.Discovered = append(e.Discovered, target)
 		e.printer.SucMsg(target)
+		time.Sleep(delay)
 	}
 
 	wgrp.Done()

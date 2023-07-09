@@ -16,7 +16,7 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 		return nil, errors.New("invalid TLD passed in")
 	}
 
-	var options EnumOpts = EnumOpts{ExistingClient: nil, TestHeader: false, Wordlist: "subdomains.txt", Timeout: 10, Https: false}
+	var options EnumOpts = EnumOpts{ExistingClient: nil, TestHeader: false, Wordlist: "subdomains.txt", Timeout: 10, Https: false, Delay: 0}
 
 	enumerator = &Enumerator{TLD: tld, Discovered: []string{}}
 
@@ -40,6 +40,7 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 	enumerator.TestHeader = options.TestHeader
 	enumerator.Wordlist = options.Wordlist
 
+	enumerator.delay = options.Delay
 	enumerator.https = options.Https
 
 	enumerator.printer, err = output.NewOutputter()
@@ -55,6 +56,19 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 func UseHeader(eo *EnumOpts) error {
 	eo.TestHeader = true
 	return nil
+}
+
+// opts func to set the max delay between requests. this is
+// to make sure the enumerator does not overload the target
+// or get blocked.
+func WithDelay(delay int) EnumOptsFunc {
+	return func(eo *EnumOpts) error {
+		if delay < 0 {
+			return errors.New("delay must be >= 0")
+		}
+		eo.Delay = delay
+		return nil
+	}
 }
 
 // opts func to set the HTTPS flag, indicating to use HTTPS

@@ -33,6 +33,10 @@ type Enumerator struct {
 	// to subdomains.txt.
 	Wordlist string
 
+	// max delay time each worker thread should wait
+	// in between requests. defaults to 0.
+	delay int
+
 	// specify HTTPS for testing.
 	https bool
 
@@ -41,6 +45,10 @@ type Enumerator struct {
 }
 
 type EnumOpts struct {
+
+	// max number of milliseconds a thread should wait
+	// in between requests.
+	Delay int
 
 	// specified if the user wants the enumerator to
 	// use an existing HTTP client. this will override
