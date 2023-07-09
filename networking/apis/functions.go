@@ -51,6 +51,7 @@ func NewMiddlwareController(optsfuncs ...MiddlewareOptsFunc) (mc *MiddlewareCont
 	mc.formatter = formatter
 
 	// set logging flag after option functions have been processed.
+	mc.options.Coloring = mo.Coloring
 	mc.options.Logging = mo.Logging
 	mc.AuthorizationFunction = mo.AuthorizationFunction
 
