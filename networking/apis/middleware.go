@@ -51,23 +51,22 @@ func (mc *MiddlewareController) Blacklisted(ipaddr string) (err error) {
 
 // function designed to log a middleware event.
 func (mc *MiddlewareController) LogEvent(message string, severity int) {
-	var outmsg string
 
 	// set text color based on the severity of the event if
 	// coloring flag is set.
 	if mc.options.Coloring {
 		switch severity {
 		case EVENT_ERROR:
-			outmsg = mc.formatter.RedText(message)
+			message = mc.formatter.RedText(message)
 		case EVENT_SUCCESS:
-			outmsg = mc.formatter.GreenText(message)
+			message = mc.formatter.GreenText(message)
 		default:
-			outmsg = mc.formatter.BlueText(message)
+			message = mc.formatter.BlueText(message)
 		}
 	}
 
 	// output event message.
-	log.Printf("%s\n", outmsg)
+	log.Printf("%s\n", message)
 
 	return
 }
