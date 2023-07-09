@@ -60,6 +60,8 @@ func (mc *MiddlewareController) LogEvent(message string, severity int) {
 			message = mc.formatter.RedText(message)
 		case EVENT_SUCCESS:
 			message = mc.formatter.GreenText(message)
+		case EVENT_WARNING:
+			message = mc.formatter.YellowText(message)
 		default:
 			message = mc.formatter.BlueText(message)
 		}
