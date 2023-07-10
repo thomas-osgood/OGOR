@@ -13,8 +13,8 @@ import (
 )
 
 // function designed to enumerate a top-level domain for
-// subdomains using Virtual Host enumeration. this will
-// use the wordlist provided to the enumerator.
+// subdomains using VHost enumeration. this will use the
+// wordlist provided to the enumerator.
 func (e *Enumerator) EnumSubdomainsVHOST() (err error) {
 	var comms chan string = make(chan string)
 	var listgen *generators.WordlistGenerator
@@ -32,6 +32,36 @@ func (e *Enumerator) EnumSubdomainsVHOST() (err error) {
 	for i := 0; i < 10; i++ {
 		wgrp.Add(1)
 		go e.vhostWorker(&comms, wgrp)
+	}
+	wgrp.Wait()
+
+	if len(e.Discovered) < 1 {
+		return errors.New("no subdomains found")
+	}
+
+	return nil
+}
+
+// function designed to enumerate a top-level domain for
+// subdomains using GET request enumeration. this will
+// use the wordlist provided to the enumerator.
+func (e *Enumerator) EnumSubdomainsGET() (err error) {
+	var comms chan string = make(chan string)
+	var listgen *generators.WordlistGenerator
+	var wgrp *sync.WaitGroup = new(sync.WaitGroup)
+
+	listgen, err = generators.NewWordlistGenerator(e.Wordlist)
+	if err != nil {
+		return err
+	}
+
+	listgen.CommsChan = comms
+
+	go listgen.ReadWordlist()
+
+	for i := 0; i < 10; i++ {
+		wgrp.Add(1)
+		go e.getWorker(&comms, wgrp)
 	}
 	wgrp.Wait()
 
@@ -103,7 +133,7 @@ func (e *Enumerator) TestTLD() (err error) {
 	return nil
 }
 
-// function designed to test a subdomain to see if returns without
+// function designed to test a subdomain to see if it returns without
 // error when a HEAD request is made against it.
 //
 // note: the subdomain must be <subdomain>.<tld> (ex: test.example.com)
@@ -126,6 +156,44 @@ func (e *Enumerator) TestSubdomainHead(subdomain string, https bool) (err error)
 	return nil
 }
 
+// function designed to test a subdomain to see if it returns without
+// error when the HOST header is manipulated.
+//
+// note: the subdomain must be <subdomain>.<tld> (ex: test.example.com)
+func (e *Enumerator) TestSubdomainHost(subdomain string, https bool) (err error) {
+	var req *http.Request
+	var resp *http.Response
+	var scheme string
+	var targeturl string
+
+	if https {
+		scheme = "https"
+	} else {
+		scheme = "http"
+	}
+
+	targeturl = fmt.Sprintf("%s://%s", scheme, e.TLD)
+
+	req, err = http.NewRequest(http.MethodGet, targeturl, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Host = subdomain
+
+	resp, err = e.Client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if (resp.StatusCode >= 400) && !((resp.StatusCode == http.StatusUnauthorized) || (resp.StatusCode == http.StatusForbidden)) {
+		return errors.New("invalid subdomain")
+	}
+
+	return nil
+}
+
 // function designed to calculate a delay based on the max allowed
 // delay of the enumerator.
 func (e *Enumerator) calculateDelay() (delay time.Duration, err error) {
@@ -138,16 +206,56 @@ func (e *Enumerator) calculateDelay() (delay time.Duration, err error) {
 	return delay, nil
 }
 
-// function designed to be a worker thread for the VHost enumeration.
+// function designed to be a worker thread for the GET enumeration.
 // this will return nil if no errors occur during testing, otherwise
 // and error is returned.
-func (e *Enumerator) vhostWorker(comms *chan string, wgrp *sync.WaitGroup) (err error) {
+func (e *Enumerator) getWorker(comms *chan string, wgrp *sync.WaitGroup) (err error) {
 	var subdomain string
 	var target string
 	var delay time.Duration
 
 	delay, err = e.calculateDelay()
 	if err != nil {
+		wgrp.Done()
+		return err
+	}
+
+	for subdomain = range *comms {
+		target = fmt.Sprintf("%s.%s", subdomain, e.TLD)
+
+		if e.display {
+			e.printer.SysMsgNB(fmt.Sprintf("testing %s", target))
+		}
+
+		err = e.TestSubdomainHead(target, e.https)
+		if err != nil {
+			time.Sleep(delay)
+			continue
+		}
+		e.Discovered = append(e.Discovered, target)
+
+		if e.display {
+			e.printer.SucMsg(target)
+		}
+
+		time.Sleep(delay)
+	}
+
+	wgrp.Done()
+	return nil
+}
+
+// function designed to be a worker thread for the VHost enumeration.
+// this will return nil if no errors occur during testing, otherwise
+// and error is returned.
+func (e *Enumerator) vhostWorker(comms *chan string, wgrp *sync.WaitGroup) (err error) {
+	var delay time.Duration
+	var subdomain string
+	var target string
+
+	delay, err = e.calculateDelay()
+	if err != nil {
+		wgrp.Done()
 		return err
 	}
 
