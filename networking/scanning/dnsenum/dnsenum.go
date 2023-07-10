@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -18,9 +19,21 @@ import (
 func (e *Enumerator) EnumSubdomainsVHOST() (err error) {
 	var comms chan string = make(chan string)
 	var listgen *generators.WordlistGenerator
+	var targetip string
+	var tldlen int
 	var wgrp *sync.WaitGroup = new(sync.WaitGroup)
 
 	listgen, err = generators.NewWordlistGenerator(e.Wordlist)
+	if err != nil {
+		return err
+	}
+
+	targetip, err = e.getIP()
+	if err != nil {
+		return err
+	}
+
+	tldlen, err = e.getTLDLen()
 	if err != nil {
 		return err
 	}
@@ -31,7 +44,7 @@ func (e *Enumerator) EnumSubdomainsVHOST() (err error) {
 
 	for i := 0; i < 10; i++ {
 		wgrp.Add(1)
-		go e.vhostWorker(&comms, wgrp)
+		go e.vhostWorker(targetip, tldlen, &comms, wgrp)
 	}
 	wgrp.Wait()
 
@@ -160,7 +173,8 @@ func (e *Enumerator) TestSubdomainHead(subdomain string, https bool) (err error)
 // error when the HOST header is manipulated.
 //
 // note: the subdomain must be <subdomain>.<tld> (ex: test.example.com)
-func (e *Enumerator) TestSubdomainHost(subdomain string, https bool) (err error) {
+func (e *Enumerator) TestSubdomainHost(subdomain string, targetip string, tldlen int, https bool) (err error) {
+	var bodydata []byte
 	var req *http.Request
 	var resp *http.Response
 	var scheme string
@@ -172,7 +186,7 @@ func (e *Enumerator) TestSubdomainHost(subdomain string, https bool) (err error)
 		scheme = "http"
 	}
 
-	targeturl = fmt.Sprintf("%s://%s", scheme, e.TLD)
+	targeturl = fmt.Sprintf("%s://%s", scheme, targetip)
 
 	req, err = http.NewRequest(http.MethodGet, targeturl, nil)
 	if err != nil {
@@ -183,12 +197,22 @@ func (e *Enumerator) TestSubdomainHost(subdomain string, https bool) (err error)
 
 	resp, err = e.Client.Do(req)
 	if err != nil {
+		e.printer.ErrMsg(err.Error())
 		return err
 	}
 	defer resp.Body.Close()
 
 	if (resp.StatusCode >= 400) && !((resp.StatusCode == http.StatusUnauthorized) || (resp.StatusCode == http.StatusForbidden)) {
 		return errors.New("invalid subdomain")
+	}
+
+	bodydata, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if len(bodydata) == tldlen {
+		return errors.New(fmt.Sprintf("length matches tld (%d)", len(bodydata)))
 	}
 
 	return nil
@@ -204,6 +228,66 @@ func (e *Enumerator) calculateDelay() (delay time.Duration, err error) {
 		delay = 0
 	}
 	return delay, nil
+}
+
+// function to get the IP address of the target domain. this will
+// be used in VHOST enumeration.
+func (e *Enumerator) getIP() (ip string, err error) {
+	var curip net.IP
+	var curip4 net.IP
+	var ips []net.IP
+
+	ips, err = net.LookupIP(e.TLD)
+	if err != nil {
+		return "", err
+	}
+
+	for _, curip = range ips {
+		if curip4 = curip.To4(); curip4 != nil {
+			ip = curip4.String()
+			break
+		}
+	}
+
+	return ip, nil
+}
+
+// function designed to get the page length of the TLD that is being
+// enumerated. this will be used to determine if a VHOST is valid or
+// a false positive.
+func (e *Enumerator) getTLDLen() (pagelen int, err error) {
+	var bodydata []byte
+	var req *http.Request
+	var resp *http.Response
+	var scheme string
+	var targeturl string
+
+	if e.https {
+		scheme = "https"
+	} else {
+		scheme = "http"
+	}
+
+	targeturl = fmt.Sprintf("%s://%s", scheme, e.TLD)
+
+	req, err = http.NewRequest(http.MethodGet, targeturl, nil)
+	if err != nil {
+		return -1, err
+	}
+
+	resp, err = e.Client.Do(req)
+	if err != nil {
+		return -1, err
+	}
+
+	bodydata, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return -1, err
+	}
+
+	pagelen = len(bodydata)
+
+	return pagelen, nil
 }
 
 // function designed to be a worker thread for the GET enumeration.
@@ -248,7 +332,7 @@ func (e *Enumerator) getWorker(comms *chan string, wgrp *sync.WaitGroup) (err er
 // function designed to be a worker thread for the VHost enumeration.
 // this will return nil if no errors occur during testing, otherwise
 // and error is returned.
-func (e *Enumerator) vhostWorker(comms *chan string, wgrp *sync.WaitGroup) (err error) {
+func (e *Enumerator) vhostWorker(targetip string, tldlen int, comms *chan string, wgrp *sync.WaitGroup) (err error) {
 	var delay time.Duration
 	var subdomain string
 	var target string
@@ -266,7 +350,7 @@ func (e *Enumerator) vhostWorker(comms *chan string, wgrp *sync.WaitGroup) (err 
 			e.printer.SysMsgNB(fmt.Sprintf("testing %s", target))
 		}
 
-		err = e.TestSubdomainHead(target, e.https)
+		err = e.TestSubdomainHost(target, targetip, tldlen, e.https)
 		if err != nil {
 			time.Sleep(delay)
 			continue
