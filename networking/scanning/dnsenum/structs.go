@@ -47,6 +47,9 @@ type Enumerator struct {
 
 	// object used to output data.
 	printer *output.Outputter
+
+	// number of threads to use for enumeration.
+	threads int
 }
 
 type EnumOpts struct {
@@ -72,6 +75,9 @@ type EnumOpts struct {
 	// the domain using "Host: <subdomain>" to search
 	// for subdomains.
 	TestHeader bool
+
+	// number of threads to use in enumeration.
+	ThreadCount int
 
 	// amount of time (in seconds) to wait before dropping
 	// the request if it has not responded.

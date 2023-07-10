@@ -42,7 +42,7 @@ func (e *Enumerator) EnumSubdomainsVHOST() (err error) {
 
 	go listgen.ReadWordlist()
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < e.threads; i++ {
 		wgrp.Add(1)
 		go e.vhostWorker(targetip, tldlen, &comms, wgrp)
 	}
@@ -72,7 +72,7 @@ func (e *Enumerator) EnumSubdomainsGET() (err error) {
 
 	go listgen.ReadWordlist()
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < e.threads; i++ {
 		wgrp.Add(1)
 		go e.getWorker(&comms, wgrp)
 	}

@@ -43,6 +43,7 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 	enumerator.delay = options.Delay
 	enumerator.display = options.Display
 	enumerator.https = options.Https
+	enumerator.threads = options.ThreadCount
 
 	enumerator.printer, err = output.NewOutputter()
 	if err != nil {
@@ -85,6 +86,17 @@ func WithDelay(delay int) EnumOptsFunc {
 func WithHTTPS(eo *EnumOpts) error {
 	eo.Https = true
 	return nil
+}
+
+// opts func to specify the number of threads to use.
+func WithThreadCount(count int) EnumOptsFunc {
+	return func(eo *EnumOpts) error {
+		if (count < 1) || (count > 100) {
+			return errors.New("threadcount must be in range 1 - 100")
+		}
+		eo.ThreadCount = count
+		return nil
+	}
 }
 
 // opts func to specify the timeout duration for the client.
