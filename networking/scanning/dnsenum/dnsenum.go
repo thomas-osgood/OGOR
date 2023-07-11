@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	errorhandling "github.com/thomas-osgood/OGOR/misc/error-handling"
 	"github.com/thomas-osgood/OGOR/misc/generators"
 )
 
@@ -218,6 +219,22 @@ func (e *Enumerator) TestSubdomainHost(subdomain string, targetip string, tldlen
 	return nil
 }
 
+// function designed to add a subdomain to the Discovered slice. this
+// will only add the subdomain if it does not already exist within
+// the slice.
+func (e *Enumerator) addSubdomain(subdomain string) (err error) {
+
+	err = e.subdomainExists(subdomain)
+	if (err != nil) && !(errors.Is(err, &errorhandling.NotFoundError{})) {
+		return err
+	} else if err == nil {
+		return nil
+	}
+
+	e.Discovered = append(e.Discovered, subdomain)
+	return nil
+}
+
 // function designed to calculate a delay based on the max allowed
 // delay of the enumerator.
 func (e *Enumerator) calculateDelay() (delay time.Duration, err error) {
@@ -316,9 +333,12 @@ func (e *Enumerator) getWorker(comms *chan string, wgrp *sync.WaitGroup) (err er
 			time.Sleep(delay)
 			continue
 		}
-		e.Discovered = append(e.Discovered, target)
+		err = e.addSubdomain(target)
 
 		if e.display {
+			if err != nil {
+				e.printer.ErrMsg(err.Error())
+			}
 			e.printer.SucMsg(target)
 		}
 
@@ -326,6 +346,27 @@ func (e *Enumerator) getWorker(comms *chan string, wgrp *sync.WaitGroup) (err er
 	}
 
 	wgrp.Done()
+	return nil
+}
+
+// function designed to check if a given subdomain exists within
+// the Discovered slice of the Enumerator. if the subdomain does
+// not exist, a NotFoundError is returned.
+func (e *Enumerator) subdomainExists(subdomain string) (err error) {
+	var current string
+	var found bool = false
+
+	for _, current = range e.Discovered {
+		if current == subdomain {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return &errorhandling.NotFoundError{}
+	}
+
 	return nil
 }
 
@@ -355,9 +396,12 @@ func (e *Enumerator) vhostWorker(targetip string, tldlen int, comms *chan string
 			time.Sleep(delay)
 			continue
 		}
-		e.Discovered = append(e.Discovered, target)
+		err = e.addSubdomain(target)
 
 		if e.display {
+			if err != nil {
+				e.printer.ErrMsg(err.Error())
+			}
 			e.printer.SucMsg(target)
 		}
 
