@@ -42,8 +42,11 @@ func GenRandomName(minlen int, maxlen int) (randstr string, err error) {
 // so the end-user can use them to make requests. this can allow
 // a user to have a different IP address each request.
 func ProxyGenerator(ps *proxyscrape.ProxyScraper, c chan string, wg *sync.WaitGroup, exit *bool) (err error) {
-	wg.Add(1)
-	defer wg.Done()
+	if wg != nil {
+		wg.Add(1)
+		defer wg.Done()
+	}
+
 	defer close(c)
 
 	var idx int = 0
