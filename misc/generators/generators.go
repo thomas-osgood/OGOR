@@ -4,7 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
+
+	"github.com/thomas-osgood/OGOR/networking/proxyscrape"
 )
 
 // function designed to generate a random string
@@ -33,4 +36,51 @@ func GenRandomName(minlen int, maxlen int) (randstr string, err error) {
 	}
 
 	return randstr, nil
+}
+
+// function designed to continually feed proxies into a channel
+// so the end-user can use them to make requests. this can allow
+// a user to have a different IP address each request.
+func ProxyGenerator(ps *proxyscrape.ProxyScraper, c chan string, wg *sync.WaitGroup, exit *bool) (err error) {
+	wg.Add(1)
+	defer wg.Done()
+	defer close(c)
+
+	var idx int = 0
+	var max int = 0
+
+	// if no proxyscraper object was passed in, create a new one
+	// with a default configuration.
+	if ps == nil {
+		ps, err = proxyscrape.NewProxyScraper()
+		if err != nil {
+			return err
+		}
+	}
+
+	// check the lenght of the proxies slice to make sure it
+	// has been populated. if it is empty, call the GetProxies
+	// function to populate it.
+	if len(ps.Proxies.Proxies) < 1 {
+		err = ps.GetProxies()
+		if err != nil {
+			return err
+		}
+	}
+
+	// set length to use for mod division.
+	max = len(ps.Proxies.Proxies)
+
+	// continually loop through the pulled down proxies and
+	// feed them to the channel. if the "exit" flag is set
+	// to true, break the loop and exit.
+	for {
+		if *exit {
+			break
+		}
+		c <- ps.Proxies.Proxies[idx]
+		idx = (idx + 1) % max
+	}
+
+	return nil
 }
