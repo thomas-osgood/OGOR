@@ -7,6 +7,9 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
+	"net/url"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -129,6 +132,75 @@ func (e *Enumerator) GetTLDLength() (err error) {
 	}
 
 	e.TLDLength = len(bodycontent)
+
+	return nil
+}
+
+// function designed to use a google dork to attempt to locate
+// subdomains of the given domain.
+func (e *Enumerator) GoogleDork() (err error) {
+	var bodydata []byte
+	var client http.Client = http.Client{}
+	var dork string = fmt.Sprintf(`site:*.%s`, e.TLD)
+	var match []byte
+	var matches [][]byte
+	var matchstr string
+	var pattern string = fmt.Sprintf(`a href="(\/url\?q=)?http(s)?:\/\/[a-zA-Z0-9]+\.%s`, strings.ReplaceAll(e.TLD, ".", `\.`))
+	var re *regexp.Regexp
+	var req *http.Request
+	var resp *http.Response
+	var targeturl string
+
+	targeturl = fmt.Sprintf("https://www.google.com/search?q=%s", url.PathEscape(dork))
+
+	req, err = http.NewRequest(http.MethodGet, targeturl, nil)
+	if err != nil {
+		return err
+	}
+
+	if e.display {
+		e.printer.SysMsgNB("dorking google ...")
+	}
+
+	resp, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		return errors.New(fmt.Sprintf("dork returned bad status code (%s)", resp.Status))
+	}
+
+	bodydata, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	re, err = regexp.Compile(pattern)
+	if err != nil {
+		return err
+	}
+
+	if e.display {
+		e.printer.SysMsgNB("searching response for subdomains ...")
+	}
+
+	matches = re.FindAll(bodydata, -1)
+	if matches == nil {
+		return errors.New("no results discovered in dork")
+	}
+
+	for _, match = range matches {
+		matchstr = strings.Split(strings.Split(strings.Split(string(match), "//")[1], "/")[0], "?")[0]
+		err = e.addSubdomain(matchstr)
+	}
+
+	if e.display {
+		for _, subdomain := range e.Discovered {
+			e.printer.SucMsg(subdomain)
+		}
+	}
 
 	return nil
 }
