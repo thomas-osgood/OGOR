@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -79,10 +80,65 @@ func (p *ProxyScraper) GetProxies() (err error) {
 
 	// convert bytes to string, ignoring blank line at ent.
 	bodystring = strings.Trim(string(bodycontent), " \n\r")
+	bodystring = strings.ReplaceAll(bodystring, "\r", "")
 
 	// split return string by newline and make slice.
 	p.Proxies.Proxies = strings.Split(bodystring, "\n")
 
+	err = p.cleanProxies()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// function designed to go through all the proxies and remove
+// those that are not working.
+func (p *ProxyScraper) cleanProxies() (err error) {
+	var badchan chan string = make(chan string)
+	var badproxy string
+	var badproxies []string
+	var wg *sync.WaitGroup = &sync.WaitGroup{}
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go p.cleanWorker(&badproxies, badchan, wg)
+	}
+
+	go func(proxies []string, c chan string) {
+		defer close(c)
+		for _, proxy := range proxies {
+			c <- proxy
+		}
+		return
+	}(p.Proxies.Proxies, badchan)
+	wg.Wait()
+
+	for _, badproxy = range badproxies {
+		for idx, current := range p.Proxies.Proxies {
+			if current == badproxy {
+				p.Proxies.Proxies = append(p.Proxies.Proxies[:idx], p.Proxies.Proxies[idx+1:]...)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// function designed to be a worker for the cleanProxies function.
+func (p *ProxyScraper) cleanWorker(badproxies *[]string, badchan chan string, wgrp *sync.WaitGroup) (err error) {
+	defer wgrp.Done()
+
+	var proxy string
+
+	for proxy = range badchan {
+		err = p.testProxy(proxy)
+		if err != nil {
+			*badproxies = append(*badproxies, proxy)
+		}
+	}
 	return nil
 }
 
@@ -143,4 +199,30 @@ func (p *ProxyScraper) getSSLOption() (ssl string, err error) {
 // specified timeout.
 func (p *ProxyScraper) getTimeoutString() string {
 	return fmt.Sprintf("%d", p.timeout)
+}
+
+// function designed to see if the given proxy is up and running.
+func (p *ProxyScraper) testProxy(proxy string) (err error) {
+	var client http.Client = http.Client{Timeout: time.Duration(10 * time.Second)}
+	var proxyurl *url.URL
+	var resp *http.Response
+	var transport *http.Transport
+
+	proxy = fmt.Sprintf("http://%s", proxy)
+
+	proxyurl, err = url.Parse(proxy)
+	if err != nil {
+		return err
+	}
+
+	transport = &http.Transport{Proxy: http.ProxyURL(proxyurl)}
+	client.Transport = transport
+
+	resp, err = client.Head("https://www.google.com/")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
 }
