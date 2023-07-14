@@ -87,3 +87,35 @@ func ProxyGenerator(ps *proxyscrape.ProxyScraper, c chan string, wg *sync.WaitGr
 
 	return nil
 }
+
+// function designed to continually loop through a given slice and
+// feed the current item into the channel.
+func SliceIterator[T any](slice []T, commschan chan T, exit *bool) (err error) {
+	defer close(commschan)
+
+	var curitem T
+	var idx int = 0
+
+	// return error if slice is empty.
+	if len(slice) < 1 {
+		return errors.New("cannot iterate over empty slice")
+	}
+
+	// continuall loop through target slice and feed the current item
+	// into the channel. if the exit flag is set, break the loop, close
+	// the channel and return without error.
+	for {
+		if *exit {
+			break
+		}
+
+		curitem = slice[idx]
+		commschan <- curitem
+
+		// keep idx within the bounds of the slice by taking the
+		// modulus result of idx+1.
+		idx = (idx + 1) % len(slice)
+	}
+
+	return nil
+}
