@@ -3,6 +3,7 @@ package dnsenum
 import (
 	"net/http"
 
+	"github.com/thomas-osgood/OGOR/networking/proxyscrape"
 	"github.com/thomas-osgood/OGOR/output"
 )
 
@@ -48,6 +49,14 @@ type Enumerator struct {
 	// object used to output data.
 	printer *output.Outputter
 
+	// channel used to pass proxie server addresses from the
+	// proxy generator to the function.
+	proxychan chan string
+
+	// object used to set the proxy using a list of proxies
+	// from proxyscraper.
+	proxyscraper *proxyscrape.ProxyScraper
+
 	// number of threads to use for enumeration.
 	threads int
 }
@@ -70,6 +79,9 @@ type EnumOpts struct {
 
 	// specify HTTPS for testing
 	Https bool
+
+	// boolean flag indicating whether to use proxyscraper.
+	ProxyScraper *proxyscrape.ProxyScraper
 
 	// flag indicating whether the enumerator should test
 	// the domain using "Host: <subdomain>" to search

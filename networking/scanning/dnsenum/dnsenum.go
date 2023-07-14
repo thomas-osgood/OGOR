@@ -64,12 +64,18 @@ func (e *Enumerator) EnumSubdomainsVHOST() (err error) {
 // use the wordlist provided to the enumerator.
 func (e *Enumerator) EnumSubdomainsGET() (err error) {
 	var comms chan string = make(chan string)
+	var exit bool = false
 	var listgen *generators.WordlistGenerator
 	var wgrp *sync.WaitGroup = new(sync.WaitGroup)
 
 	listgen, err = generators.NewWordlistGenerator(e.Wordlist)
 	if err != nil {
 		return err
+	}
+
+	if e.proxyscraper != nil {
+		e.proxychan = make(chan string)
+		go generators.ProxyGenerator(e.proxyscraper, e.proxychan, nil, &exit)
 	}
 
 	listgen.CommsChan = comms
@@ -81,6 +87,8 @@ func (e *Enumerator) EnumSubdomainsGET() (err error) {
 		go e.getWorker(&comms, wgrp)
 	}
 	wgrp.Wait()
+
+	exit = true
 
 	if len(e.Discovered) < 1 {
 		return errors.New("no subdomains found")
@@ -224,6 +232,9 @@ func (e *Enumerator) TestTLD() (err error) {
 //
 // note: the subdomain must be <subdomain>.<tld> (ex: test.example.com)
 func (e *Enumerator) TestSubdomainHead(subdomain string, https bool) (err error) {
+	var ok bool = true
+	var proxystr string
+	var proxyurl *url.URL
 	var resp *http.Response
 	var targeturl string
 
@@ -231,6 +242,22 @@ func (e *Enumerator) TestSubdomainHead(subdomain string, https bool) (err error)
 		targeturl = fmt.Sprintf("https://%s", subdomain)
 	} else {
 		targeturl = fmt.Sprintf("http://%s", subdomain)
+	}
+
+	// if a proxyscraper object is present, use proxies to
+	// anonymize the requests.
+	if e.proxyscraper != nil {
+		proxystr, ok = <-e.proxychan
+		if !ok {
+			return errors.New("error communicating with proxy channel")
+		}
+
+		proxyurl, err = url.Parse(proxystr)
+		if err != nil {
+			return err
+		}
+
+		e.Client.Transport = &http.Transport{Proxy: http.ProxyURL(proxyurl)}
 	}
 
 	resp, err = e.Client.Head(targeturl)
@@ -270,7 +297,6 @@ func (e *Enumerator) TestSubdomainHost(subdomain string, targetip string, tldlen
 
 	resp, err = e.Client.Do(req)
 	if err != nil {
-		e.printer.ErrMsg(err.Error())
 		return err
 	}
 	defer resp.Body.Close()

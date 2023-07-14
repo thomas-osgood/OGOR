@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/thomas-osgood/OGOR/networking/proxyscrape"
 	"github.com/thomas-osgood/OGOR/output"
 )
 
@@ -16,9 +17,18 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 		return nil, errors.New("invalid TLD passed in")
 	}
 
-	var options EnumOpts = EnumOpts{ExistingClient: nil, TestHeader: false, Wordlist: "subdomains.txt", Timeout: 10, Https: false, Delay: 0, Display: false}
+	var options EnumOpts = EnumOpts{
+		ExistingClient: nil,
+		TestHeader:     false,
+		Wordlist:       "subdomains.txt",
+		Timeout:        10,
+		Https:          false,
+		Delay:          0,
+		Display:        false,
+		ProxyScraper:   nil,
+	}
 
-	enumerator = &Enumerator{TLD: tld, Discovered: []string{}}
+	enumerator = &Enumerator{TLD: tld, Discovered: []string{}, proxyscraper: nil}
 
 	// loop through EnumOptsFuncs passed in and
 	// set user-defined values.
@@ -32,7 +42,7 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 	if options.ExistingClient != nil {
 		enumerator.Client = options.ExistingClient
 	} else {
-		enumerator.Client = &http.Client{}
+		enumerator.Client = &http.Client{Timeout: time.Duration(10 * time.Second)}
 	}
 
 	enumerator.Client.Timeout = time.Duration(options.Timeout * float64(time.Second))
@@ -43,11 +53,16 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 	enumerator.delay = options.Delay
 	enumerator.display = options.Display
 	enumerator.https = options.Https
+	enumerator.proxyscraper = options.ProxyScraper
 	enumerator.threads = options.ThreadCount
 
 	enumerator.printer, err = output.NewOutputter()
 	if err != nil {
 		return nil, err
+	}
+
+	if (enumerator.proxyscraper != nil) && (len(enumerator.proxyscraper.Proxies.Proxies) < 1) {
+		return nil, errors.New("no working proxies pulled down")
 	}
 
 	return enumerator, nil
@@ -86,6 +101,36 @@ func WithDelay(delay int) EnumOptsFunc {
 func WithHTTPS(eo *EnumOpts) error {
 	eo.Https = true
 	return nil
+}
+
+// opts func to set the proxyscraper to use when enumerating
+// the target domain. if the input to this function is nil,
+// a new proxyscraper will be generated with the country
+// set to "us", the anonymity set to "elite" and the protocol
+// being set to HTTP with no SSL.
+func WithProxyScraper(scraper *proxyscrape.ProxyScraper) EnumOptsFunc {
+	return func(eo *EnumOpts) (err error) {
+		if scraper == nil {
+			scraper, err = proxyscrape.NewProxyScraper(
+				proxyscrape.UsingCountry("us"),
+				proxyscrape.UsingAnonymity("elite"),
+				proxyscrape.UsingProtocol("http"),
+				proxyscrape.UsingSSL("no"),
+			)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		err = scraper.GetProxies()
+		if err != nil {
+			return err
+		}
+
+		eo.ProxyScraper = scraper
+		return nil
+	}
 }
 
 // opts func to specify the number of threads to use.
