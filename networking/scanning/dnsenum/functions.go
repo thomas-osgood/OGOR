@@ -61,8 +61,13 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 		return nil, err
 	}
 
-	if (enumerator.proxyscraper != nil) && (len(enumerator.proxyscraper.Proxies.Proxies) < 1) {
-		return nil, errors.New("no working proxies pulled down")
+	if enumerator.proxyscraper != nil {
+		switch {
+		case len(enumerator.proxies) > 0:
+			return nil, errors.New("cannot specify both WithProxies and WithProxyScraper options")
+		case len(enumerator.proxyscraper.Proxies.Proxies) < 1:
+			return nil, errors.New("no working proxies pulled down")
+		}
 	}
 
 	return enumerator, nil
@@ -101,6 +106,18 @@ func WithDelay(delay int) EnumOptsFunc {
 func WithHTTPS(eo *EnumOpts) error {
 	eo.Https = true
 	return nil
+}
+
+// opts func to set the proxy slice to use when enumerating
+// a target domain.
+func WithProxies(proxies []string) EnumOptsFunc {
+	return func(eo *EnumOpts) error {
+		if len(proxies) < 1 {
+			return errors.New("proxy list should not be empty")
+		}
+		eo.Proxies = proxies
+		return nil
+	}
 }
 
 // opts func to set the proxyscraper to use when enumerating

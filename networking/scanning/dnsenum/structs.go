@@ -49,6 +49,9 @@ type Enumerator struct {
 	// object used to output data.
 	printer *output.Outputter
 
+	// list of proxies to use when enumerating a target.
+	proxies []string
+
 	// channel used to pass proxie server addresses from the
 	// proxy generator to the function.
 	proxychan chan string
@@ -79,6 +82,9 @@ type EnumOpts struct {
 
 	// specify HTTPS for testing
 	Https bool
+
+	// user-defined list of proxies to use during enum.
+	Proxies []string
 
 	// boolean flag indicating whether to use proxyscraper.
 	ProxyScraper *proxyscrape.ProxyScraper
