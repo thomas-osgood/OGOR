@@ -76,6 +76,9 @@ func (e *Enumerator) EnumSubdomainsGET() (err error) {
 	if e.proxyscraper != nil {
 		e.proxychan = make(chan string)
 		go generators.ProxyGenerator(e.proxyscraper, e.proxychan, nil, &exit)
+	} else if len(e.proxies) > 0 {
+		e.proxychan = make(chan string)
+		go generators.SliceIterator(e.proxies, e.proxychan, &exit)
 	}
 
 	listgen.CommsChan = comms

@@ -35,7 +35,7 @@ func NewEnumerator(tld string, opts ...EnumOptsFunc) (enumerator *Enumerator, er
 	for _, fn := range opts {
 		err = fn(&options)
 		if err != nil {
-			fmt.Printf("[init] error executing \"%v\"\n", fn)
+			return nil, errors.New(fmt.Sprintf("error creating enumerator: %s\n", err.Error()))
 		}
 	}
 
