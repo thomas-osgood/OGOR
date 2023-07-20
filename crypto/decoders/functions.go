@@ -61,3 +61,21 @@ func readCiphertextFile(filename string) (ciphertext []byte, err error) {
 
 	return ciphertext, nil
 }
+
+// xordecoderoptsfunc designed to specify the ciphertext to
+// use when attempting to decode.
+func WithCiphertext(ciphertext []byte) XORDecoderOptsFunc {
+	return func(xo *XORDecoderOptions) error {
+		xo.Ciphertext = ciphertext
+		return nil
+	}
+}
+
+// xordecoderoptsfunc designed to specify the name of the file
+// in which the ciphertext is stored.
+func WithFile(filename string) XORDecoderOptsFunc {
+	return func(xo *XORDecoderOptions) error {
+		xo.Filename = filename
+		return nil
+	}
+}
