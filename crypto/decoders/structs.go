@@ -8,6 +8,9 @@ type XORDecoder struct {
 	// this is the hexidecimal message to be decoded.
 	ciphertext []byte
 
+	// this is the encryption/decryption key to test with.
+	EncryptionKey []byte
+
 	// this is the decoded plaintext message.
 	Plaintext string
 }
@@ -28,4 +31,17 @@ type XORDecoderOptions struct {
 	//
 	// note: this cannot be set alongside Filename.
 	Ciphertext []byte
+
+	// this is the encryption/decryption key to test with.
+	//
+	// note: this cannot be set alongside EncryptionKeyFile
+	EncryptionKey []byte
+
+	// if this variable is set, it holds the file in which
+	// the encryption key is saved. this file will be read
+	// and the encryption key will be loaded into the
+	// XORDecoder's EncryptionKey variable.
+	//
+	// note: this cannot be set alongside EncryptionKey
+	EncryptionKeyFile string
 }

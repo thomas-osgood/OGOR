@@ -21,6 +21,7 @@ func NewXORDecoder(options ...XORDecoderOptsFunc) (decoder *XORDecoder, err erro
 		}
 	}
 
+	// switch statement to check the ciphertext.
 	switch {
 	case (len(optionstruct.Ciphertext) < 1) && (len(optionstruct.Filename) < 1):
 		return nil, errors.New("must specify file or ciphertext for XORDecoder")
@@ -33,6 +34,21 @@ func NewXORDecoder(options ...XORDecoderOptsFunc) (decoder *XORDecoder, err erro
 		}
 	default:
 		decoder.ciphertext = optionstruct.Ciphertext
+	}
+
+	// switch statement to check the encryption key.
+	switch {
+	case (optionstruct.EncryptionKey == nil) && (len(optionstruct.EncryptionKeyFile) < 1):
+		decoder.EncryptionKey = decoder.ciphertext
+	case len(optionstruct.EncryptionKeyFile) > 0:
+		decoder.EncryptionKey, err = readCiphertextFile(optionstruct.EncryptionKeyFile)
+		if err != nil {
+			return nil, err
+		}
+	case optionstruct.EncryptionKey != nil:
+		decoder.EncryptionKey = optionstruct.EncryptionKey
+	default:
+		decoder.EncryptionKey = optionstruct.EncryptionKey
 	}
 
 	return decoder, nil
@@ -76,6 +92,24 @@ func WithCiphertext(ciphertext []byte) XORDecoderOptsFunc {
 func WithFile(filename string) XORDecoderOptsFunc {
 	return func(xo *XORDecoderOptions) error {
 		xo.Filename = filename
+		return nil
+	}
+}
+
+// xordecoderoptsfunc designed to specify the encryption key
+// to use.
+func WithKey(keybytes []byte) XORDecoderOptsFunc {
+	return func(xo *XORDecoderOptions) error {
+		xo.EncryptionKey = keybytes
+		return nil
+	}
+}
+
+// xordecoderoptsfunc designed to specify the encryption key
+// file to read the encryption key from.
+func WithKeyFile(filename string) XORDecoderOptsFunc {
+	return func(xo *XORDecoderOptions) error {
+		xo.EncryptionKeyFile = filename
 		return nil
 	}
 }
