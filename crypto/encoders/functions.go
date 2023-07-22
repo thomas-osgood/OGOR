@@ -51,6 +51,9 @@ func NewXOREncoder(options ...XOREncoderOptsFunc) (encoder *XOREncoder, err erro
 		encoder.key = optionstruct.Key
 	}
 
+	// set encryption key offset
+	encoder.keyoffset = optionstruct.KeyOffset
+
 	return encoder, nil
 }
 
@@ -126,6 +129,15 @@ func WithKey(keybytes []byte) XOREncoderOptsFunc {
 func WithKeyFile(filename string) XOREncoderOptsFunc {
 	return func(xo *XOREncoderOptions) error {
 		xo.KeyFile = filename
+		return nil
+	}
+}
+
+// xorencoderoptsfunc designed to specify the key offset
+// to use when encrypting plaintext.
+func WithKeyOffset(offset int) XOREncoderOptsFunc {
+	return func(xo *XOREncoderOptions) error {
+		xo.KeyOffset = offset
 		return nil
 	}
 }

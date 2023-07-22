@@ -11,6 +11,10 @@ type XOREncoder struct {
 	// the ciphertext.
 	key []byte
 
+	// offset used when encrypting. this will determine the
+	// start position within the key.
+	keyoffset int
+
 	// plaintext data to encrypt. this is human-readable and
 	// the data that needs to be protected.
 	plaintext string
@@ -42,4 +46,8 @@ type XOREncoderOptions struct {
 	//
 	// note: this cannot be set alongside KeyFile.
 	Key []byte
+
+	// offset that will be used when encrypting. this will determine
+	// the start position within the key.
+	KeyOffset int
 }
