@@ -102,3 +102,39 @@ func readPlaintextFile(filename string) (plaintext string, err error) {
 
 	return plaintext, nil
 }
+
+// xorencoderoptsfunc designed to specify the name of the file
+// in which the plaintext is stored.
+func WithFile(filename string) XOREncoderOptsFunc {
+	return func(xo *XOREncoderOptions) error {
+		xo.PlaintextFile = filename
+		return nil
+	}
+}
+
+// xorencoderoptsfunc designed to specify the encryption key
+// to use.
+func WithKey(keybytes []byte) XOREncoderOptsFunc {
+	return func(xo *XOREncoderOptions) error {
+		xo.Key = keybytes
+		return nil
+	}
+}
+
+// xorencoderoptsfunc designed to specify the encryption key
+// file to read the encryption key from.
+func WithKeyFile(filename string) XOREncoderOptsFunc {
+	return func(xo *XOREncoderOptions) error {
+		xo.KeyFile = filename
+		return nil
+	}
+}
+
+// xorencoderoptsfunc designed to specify the plaintext the
+// user wants to encrypt.
+func WithPlaintext(plaintext string) XOREncoderOptsFunc {
+	return func(xo *XOREncoderOptions) error {
+		xo.Plaintext = plaintext
+		return nil
+	}
+}
