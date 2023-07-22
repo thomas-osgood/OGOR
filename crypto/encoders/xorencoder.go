@@ -16,7 +16,7 @@ func (xoe *XOREncoder) XORPreviousPosition() (err error) {
 	var plainhex string = hex.EncodeToString([]byte(xoe.plaintext))
 	var pos int = 0
 
-	xoe.Ciphertext = []byte("")
+	xoe.Ciphertext = ""
 
 	for i = 0; i < len(plainhex); i += 2 {
 		curhex = []byte(plainhex[i : i+2])
@@ -31,7 +31,7 @@ func (xoe *XOREncoder) XORPreviousPosition() (err error) {
 			curbaseten ^= int64(xoe.plaintext[pos-1])
 		}
 
-		xoe.Ciphertext = []byte(fmt.Sprintf("%s%02x", string(xoe.Ciphertext), byte(curbaseten)))
+		xoe.Ciphertext = fmt.Sprintf("%s%02x", string(xoe.Ciphertext), byte(curbaseten))
 
 		pos += 1
 	}
