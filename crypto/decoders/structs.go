@@ -9,6 +9,10 @@ type XORDecoder struct {
 	ciphertext []byte
 
 	// this is the encryption/decryption key to test with.
+	//
+	// note: this should be the hexidecimal representation
+	// of the ascii characters. if the key is "hello", the
+	// value of key should be "68656c6c6f".
 	EncryptionKey []byte
 
 	// this is the decoded plaintext message.
