@@ -9,6 +9,10 @@ type XOREncoder struct {
 
 	// key used to encrypt the plaintext data and generate
 	// the ciphertext.
+	//
+	// note: this should be the hexidecimal representation
+	// of the ascii characters. if the key is "hello", the
+	// value of key should be "68656c6c6f".
 	key []byte
 
 	// offset used when encrypting. this will determine the

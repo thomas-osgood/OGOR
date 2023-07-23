@@ -38,3 +38,33 @@ func (xoe *XOREncoder) XORPreviousPosition() (err error) {
 
 	return nil
 }
+
+// function designed to loop through the plaintext and encrypt each
+// character using the key provided.
+func (xoe *XOREncoder) XOREncryptWithKey() (err error) {
+	var cipherval int
+	var i int = 0
+	var keylen int = len(string(xoe.key))
+	var keypos int
+	var keyval int
+	var offset int = xoe.keyoffset % keylen
+	var plainval int
+
+	keypos = offset
+
+	xoe.Ciphertext = ""
+
+	for i = 0; i < len(xoe.plaintext); i++ {
+		keyval = int(byte(xoe.key[keypos]))
+		plainval = int(byte(xoe.plaintext[i]))
+
+		cipherval = plainval ^ keyval
+
+		xoe.Ciphertext = fmt.Sprintf("%s%02x", xoe.Ciphertext, byte(cipherval))
+
+		keypos = (keypos + 1) % keylen
+
+	}
+
+	return nil
+}
