@@ -24,7 +24,6 @@ func (ipg *PublicIPGrabber) GetMyIPInformation() (err error) {
 	const useragent string = "grabber"
 
 	var bodycontent []byte
-	var client *http.Client = http.DefaultClient
 	var jsonResp PublicIPInfo = PublicIPInfo{}
 	var req *http.Request
 	var resp *http.Response
@@ -42,7 +41,7 @@ func (ipg *PublicIPGrabber) GetMyIPInformation() (err error) {
 	req.Header.Set("Sec-GPC", secgpc)
 	req.Header.Set("User-Agent", useragent)
 
-	resp, err = client.Do(req)
+	resp, err = ipg.client.Do(req)
 	if err != nil {
 		return err
 	}

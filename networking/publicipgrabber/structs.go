@@ -1,10 +1,25 @@
 package publicipgrabber
 
+import "net/http"
+
 // structure defining a PublicIPGrabber object. this
 // will have associated functions to query the site
 // api.whatismyip.com and grab the public IP info.
 type PublicIPGrabber struct {
+	// http client that will be used to carry
+	// out queries to api.whatismyip.com.
+	client *http.Client
+
+	// information pulled down from api.whatismyip.com.
 	PublicIP PublicIPInfo
+}
+
+// structure defining the object that will be used
+// to initialize a public ip grabber object.
+type PublicIPGrabberOptions struct {
+	// http client that will be used to carry
+	// out queries to api.whatismyip.com.
+	Client *http.Client
 }
 
 // structure holding public ip information. this will
