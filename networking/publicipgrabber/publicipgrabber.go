@@ -21,7 +21,6 @@ func (ipg *PublicIPGrabber) GetMyIPInformation() (err error) {
 	const origin string = "https://www.whatismyip.com"
 	const referer string = "https://www.whatismyip.com"
 	const secgpc string = "1"
-	const targeturl string = "https://api.whatismyip.com/wimi.php"
 	const useragent string = "grabber"
 
 	var bodycontent []byte
@@ -29,6 +28,7 @@ func (ipg *PublicIPGrabber) GetMyIPInformation() (err error) {
 	var jsonResp PublicIPInfo = PublicIPInfo{}
 	var req *http.Request
 	var resp *http.Response
+	var targeturl string = fmt.Sprintf("%s/wimi.php", BASE_URL)
 
 	req, err = http.NewRequest(http.MethodPost, targeturl, nil)
 	if err != nil {
