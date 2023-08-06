@@ -28,6 +28,8 @@ func (ipg *PublicIPGrabber) GetIPInformation(targetip string) (ipinformation *Ap
 
 	ipinformation = new(AppResponse)
 
+	// build required multipart data. this specifies the action being
+	// performed along with the target to perform the action on.
 	err = ipg.setLookupMultipartData(datawriter, targetip)
 	if err != nil {
 		return nil, err
@@ -38,6 +40,7 @@ func (ipg *PublicIPGrabber) GetIPInformation(targetip string) (ipinformation *Ap
 		return nil, err
 	}
 
+	// set content-type header specifying multipart data type.
 	req.Header.Set("Content-Type", datawriter.FormDataContentType())
 
 	err = ipg.setRequestHeaders(req)
@@ -146,7 +149,8 @@ func (ipg *PublicIPGrabber) setLookupMultipartData(datawriter *multipart.Writer,
 }
 
 // function designed to set the proper header values
-// for a request to api.whatismyip.com.
+// for a request to api.whatismyip.com. these headers
+// will be standard for each api.whatismyip.com request.
 func (ipg *PublicIPGrabber) setRequestHeaders(req *http.Request) (err error) {
 	const acceptHeader string = "*/*"
 	const acceptEncoding string = "json"
