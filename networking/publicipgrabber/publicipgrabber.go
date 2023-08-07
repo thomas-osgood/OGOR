@@ -22,6 +22,7 @@ func (ipg *PublicIPGrabber) GetIPInformation(targetip string) (ipinformation *Ap
 	var bodycontent []byte
 	var databuffer *bytes.Buffer = new(bytes.Buffer)
 	var datawriter *multipart.Writer = multipart.NewWriter(databuffer)
+	var errorstruct ErrorResponse = ErrorResponse{}
 	var req *http.Request
 	var resp *http.Response
 	var targeturl string = fmt.Sprintf("%s/app.php", BASE_URL)
@@ -30,7 +31,7 @@ func (ipg *PublicIPGrabber) GetIPInformation(targetip string) (ipinformation *Ap
 
 	// build required multipart data. this specifies the action being
 	// performed along with the target to perform the action on.
-	err = ipg.setLookupMultipartData(datawriter, targetip)
+	err = ipg.setLookupMultipartData(datawriter, "ip-lookup", targetip)
 	if err != nil {
 		return nil, err
 	}
@@ -61,6 +62,13 @@ func (ipg *PublicIPGrabber) GetIPInformation(targetip string) (ipinformation *Ap
 	bodycontent, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	err = json.Unmarshal(bodycontent, &errorstruct)
+	if err != nil {
+		return nil, err
+	} else if len(errorstruct.Error) > 0 {
+		return nil, errors.New(errorstruct.Error)
 	}
 
 	err = json.Unmarshal(bodycontent, ipinformation)
@@ -121,10 +129,73 @@ func (ipg *PublicIPGrabber) GetMyIPInformation() (err error) {
 	return nil
 }
 
+// function designed to contact api.whatismyip.com and pull down
+// the IP address attached to a given URL.
+func (ipg *PublicIPGrabber) GetUrlIP(target string) (arecords *DnsResponse, err error) {
+	var bodycontent []byte
+	var databuffer *bytes.Buffer = new(bytes.Buffer)
+	var datawriter *multipart.Writer = multipart.NewWriter(databuffer)
+	var errorstruct ErrorResponse = ErrorResponse{}
+	var req *http.Request
+	var resp *http.Response
+	var targeturl string = fmt.Sprintf("%s/app.php", BASE_URL)
+
+	arecords = new(DnsResponse)
+
+	// build required multipart data. this specifies the action being
+	// performed along with the target to perform the action on.
+	err = ipg.setLookupMultipartData(datawriter, "dns-lookup", target)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err = http.NewRequest(http.MethodPost, targeturl, databuffer)
+	if err != nil {
+		return nil, err
+	}
+
+	// set content-type header specifying multipart data type.
+	req.Header.Set("Content-Type", datawriter.FormDataContentType())
+
+	err = ipg.setRequestHeaders(req)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err = ipg.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		return nil, errors.New(fmt.Sprintf("error getting DNS info: %s", resp.Status))
+	}
+
+	bodycontent, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(bodycontent, &errorstruct)
+	if err != nil {
+		return nil, err
+	} else if len(errorstruct.Error) > 0 {
+		return nil, errors.New(errorstruct.Error)
+	}
+
+	err = json.Unmarshal(bodycontent, arecords)
+	if err != nil {
+		return nil, err
+	}
+
+	return arecords, nil
+}
+
 // function designed to setup the multipart data used in
 // a call to api.whatismyip.com when querying information
 // related to a given IP address.
-func (ipg *PublicIPGrabber) setLookupMultipartData(datawriter *multipart.Writer, targetip string) (err error) {
+func (ipg *PublicIPGrabber) setLookupMultipartData(datawriter *multipart.Writer, action string, targetip string) (err error) {
 	defer datawriter.Close()
 
 	var header textproto.MIMEHeader = make(textproto.MIMEHeader)
@@ -136,7 +207,7 @@ func (ipg *PublicIPGrabber) setLookupMultipartData(datawriter *multipart.Writer,
 	if err != nil {
 		return err
 	}
-	part.Write([]byte("ip-lookup"))
+	part.Write([]byte(action))
 
 	header.Set("Content-Disposition", "form-data; name=\"ip\"")
 	part, err = datawriter.CreatePart(header)

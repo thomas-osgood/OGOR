@@ -14,6 +14,17 @@ type AppResponse struct {
 	Ipdata LocationResponse `json:"ipdata.co"`
 }
 
+// structure representing the response from api.whatismyip.com/app.php when
+// querying DNS information related to a URL.
+type DnsResponse struct {
+	Arecords []string `json:"a-records"`
+}
+
+// structure representing an error response from api.whatismyip.com.
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 // structure defining the IP2Location and IPData
 // JSON returns from app.php.
 type LocationResponse struct {
