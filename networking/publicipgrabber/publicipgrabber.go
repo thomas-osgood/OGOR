@@ -31,7 +31,7 @@ func (ipg *PublicIPGrabber) GetIPInformation(targetip string) (ipinformation *Ap
 
 	// build required multipart data. this specifies the action being
 	// performed along with the target to perform the action on.
-	err = ipg.setLookupMultipartData(datawriter, "ip-lookup", targetip)
+	err = ipg.setLookupMultipartData(datawriter, "ip-lookup", "ip", targetip)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (ipg *PublicIPGrabber) GetUrlIP(target string) (arecords *DnsResponse, err 
 
 	// build required multipart data. this specifies the action being
 	// performed along with the target to perform the action on.
-	err = ipg.setLookupMultipartData(datawriter, "dns-lookup", target)
+	err = ipg.setLookupMultipartData(datawriter, "dns-lookup", "url", target)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +195,7 @@ func (ipg *PublicIPGrabber) GetUrlIP(target string) (arecords *DnsResponse, err 
 // function designed to setup the multipart data used in
 // a call to api.whatismyip.com when querying information
 // related to a given IP address.
-func (ipg *PublicIPGrabber) setLookupMultipartData(datawriter *multipart.Writer, action string, targetip string) (err error) {
+func (ipg *PublicIPGrabber) setLookupMultipartData(datawriter *multipart.Writer, action string, bodyname string, targetip string) (err error) {
 	defer datawriter.Close()
 
 	var header textproto.MIMEHeader = make(textproto.MIMEHeader)
@@ -209,7 +209,7 @@ func (ipg *PublicIPGrabber) setLookupMultipartData(datawriter *multipart.Writer,
 	}
 	part.Write([]byte(action))
 
-	header.Set("Content-Disposition", "form-data; name=\"ip\"")
+	header.Set("Content-Disposition", fmt.Sprintf("form-data; name=\"%s\"", bodyname))
 	part, err = datawriter.CreatePart(header)
 	if err != nil {
 		return err
