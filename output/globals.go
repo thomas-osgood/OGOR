@@ -10,7 +10,7 @@ var CLEAR_LINE string = fmt.Sprintf("\r%s2K\r", CSI)
 
 // control sequence used to clear the entire screen and move
 // the cursor to (0,0).
-var CLEAR_SCREEN string = fmt.Sprintf("%s0J%sH", CSI, CSI)
+var CLEAR_SCREEN string = fmt.Sprintf("%s2J%sH", CSI, CSI)
 
 var RED_SEQ string = fmt.Sprintf("%s%d;1m", CSI, ANSI_RED)
 var GREEN_SEQ string = fmt.Sprintf("%s%d;1m", CSI, ANSI_GREEN)
