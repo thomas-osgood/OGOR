@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "github.com/thomas-osgood/OGOR/protobufs/definitions/common";
+
+// message representing a group of bytes to transfer.
+message ByteString {
+	bytes chunk = 1;
+}
+
+// message representing an empty message. this
+// contains no content.
+message Empty {}
+
+// message representing a status return. this will
+// contain a code and message.
+message StatusMessage {
+	int32 code = 1;
+	string message = 2;
+}

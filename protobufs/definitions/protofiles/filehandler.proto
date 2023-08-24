@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package filehandler;
+
+option go_package = "github.com/thomas-osgood/OGOR/protobufs/definitions/filehandler";
+
+import "common.proto";
+
+// gRPC service designed to handle uploading and
+// downloading of files.
+service Fileservice {
+	// rpc designed to upload a file from the machine the
+	// client is running on to the server.
+	rpc DownloadFile(stream FileChunk) returns (common.StatusMessage);
+
+	// rpc designed to download a file to the machine the
+	// client is running on from the server.
+	rpc UploadFile (FileRequest) returns (stream FileChunk);
+}
+
+// message designed to transfer chunks of a 
+// file from one machine to another.
+message FileChunk {
+	bytes chunk = 1;
+}
+
+// message designed to request a file.
+message FileRequest {
+	string filename = 1;
+}
