@@ -29,6 +29,7 @@ type FHServer struct {
 func (fhs *FHServer) DownloadFile(fsrv filehandler.Fileservice_DownloadFileServer) (err error) {
 	var filename string
 	var fptr *os.File
+	var headerslice []string
 	var ok bool
 	var reqmeta metadata.MD
 
@@ -41,9 +42,14 @@ func (fhs *FHServer) DownloadFile(fsrv filehandler.Fileservice_DownloadFileServe
 	// get name of file being uploaded by reading the
 	// header data. if no filename is given, use
 	// download_<timestamp> as the filename.
-	filename = reqmeta.Get("filename")[0]
-	if len(filename) < 1 {
+	headerslice = reqmeta.Get("filename")
+	if (headerslice == nil) || (len(headerslice) < 1) {
 		filename = fmt.Sprintf("download_%s", strings.ReplaceAll(time.Now().String(), " ", "_"))
+	} else {
+		filename = headerslice[0]
+		if len(filename) < 1 {
+			filename = fmt.Sprintf("download_%s", strings.ReplaceAll(time.Now().String(), " ", "_"))
+		}
 	}
 
 	// open the local file for writing. create it if it does
@@ -59,7 +65,7 @@ func (fhs *FHServer) DownloadFile(fsrv filehandler.Fileservice_DownloadFileServe
 		return err
 	}
 
-	if err = fsrv.SendAndClose(&common.StatusMessage{Code: 0, Message: "file successfully uploaded to C2"}); err != nil {
+	if err = fsrv.SendAndClose(&common.StatusMessage{Code: 0, Message: "file successfully uploaded"}); err != nil {
 		return err
 	}
 
