@@ -59,12 +59,19 @@ func (fhs *FHServer) DownloadFile(fsrv filehandler.Fileservice_DownloadFileServe
 		return fmt.Errorf("error opening file to write: %s", err.Error())
 	}
 
+	// call the ReceiveFileBytes function to save the
+	// data to the target local file. if there is an
+	// error, the file will be closed and removed.
 	if err = general.ReceiveFileBytes(fsrv, fptr); err != nil {
 		fptr.Close()
 		os.Remove(filename)
 		return err
 	}
 
+	// make sure to send the acknowledgement that the
+	// file has been uploaded successfully. if this
+	// SendAndClose is not called, there will be communication
+	// errors between the client and server.
 	if err = fsrv.SendAndClose(&common.StatusMessage{Code: 0, Message: "file successfully uploaded"}); err != nil {
 		return err
 	}
@@ -72,8 +79,8 @@ func (fhs *FHServer) DownloadFile(fsrv filehandler.Fileservice_DownloadFileServe
 	return nil
 }
 
-// function designed to upload a file from the C2 server
-// to the machine the agent is running on.
+// function designed to upload a file from the server
+// to the machine the client is running on.
 func (fhx *FHServer) UploadFile(fr *filehandler.FileRequest, fsrv filehandler.Fileservice_UploadFileServer) (err error) {
 	var filescanner *bufio.Reader
 	var fptr *os.File
@@ -84,6 +91,8 @@ func (fhx *FHServer) UploadFile(fr *filehandler.FileRequest, fsrv filehandler.Fi
 	}
 	defer fptr.Close()
 
+	// create scanner to pass to TransmitFileBytes function.
+	// this is what will read the file chunk-by-chunk.
 	filescanner = bufio.NewReader(fptr)
 
 	if err = general.TransmitFileBytes(fsrv, filescanner); err != nil {
