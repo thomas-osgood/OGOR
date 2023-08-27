@@ -15,13 +15,13 @@ import (
 // function designed to read ByteStrings from a stream
 // and save the data to a file.
 func ReceiveByteStrings(receiver ByteReceiver, fptr *os.File) (err error) {
-	var currenByteString *common.ByteString
+	var currentByteString *common.ByteString
 
 	// read the stream ByteString-by-ByteString and
 	// save the data to the file. If End-Of-File is
 	// encountered, break the loop and return nil.
 	for {
-		currenByteString, err = receiver.Recv()
+		currentByteString, err = receiver.Recv()
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -29,7 +29,7 @@ func ReceiveByteStrings(receiver ByteReceiver, fptr *os.File) (err error) {
 			return fmt.Errorf(status.Convert(err).Message())
 		}
 
-		_, err = fptr.Write(currenByteString.GetChunk())
+		_, err = fptr.Write(currentByteString.GetChunk())
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func TransmitByteStrings(transmitter ByteTransmitter, byteReader *bytes.Reader) 
 
 		err = transmitter.Send(&common.ByteString{Chunk: currentBlock})
 		if err != nil {
-			return fmt.Errorf("error sending bytes: %s", fmt.Errorf(status.Convert(err).Message()))
+			return fmt.Errorf("error sending bytes: %s", status.Convert(err).Message())
 		}
 	}
 
@@ -117,7 +117,7 @@ func TransmitFileBytes(transmitter Transmitter, scanner *bufio.Reader) (err erro
 		// transmit the current chunk to the requester.
 		err = transmitter.Send(&filehandler.FileChunk{Chunk: currentChunk[:bytesread]})
 		if err != nil {
-			return fmt.Errorf("error transmitting chunk: %s", fmt.Errorf(status.Convert(err).Message()))
+			return fmt.Errorf("error transmitting chunk: %s", status.Convert(err).Message())
 		}
 	}
 
