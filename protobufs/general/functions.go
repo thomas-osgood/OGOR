@@ -59,7 +59,7 @@ func ReceiveFileBytes(receiver Receiver, fptr *os.File) (err error) {
 		// write the chunk to the output file. trim the
 		// null bytes to insure the file is written correctly
 		// and no extraneous bytes are added to the end.
-		_, err = fptr.Write(currentChunk.Chunk)
+		_, err = fptr.Write(currentChunk.GetChunk())
 		if err != nil {
 			return err
 		}
@@ -71,13 +71,14 @@ func ReceiveFileBytes(receiver Receiver, fptr *os.File) (err error) {
 // function designed to transmit bytes over the wire using
 // ByteString objects.
 func TransmitByteStrings(transmitter ByteTransmitter, byteReader *bytes.Reader) (err error) {
+	var bytesread int
 	var currentBlock []byte = make([]byte, CHUNKSIZE)
 
 	// iterate through the slice of bytes and transmit
 	// each buffer to the receiver. if an error is encountered,
 	// return it unless it is an EOF error.
 	for {
-		_, err = byteReader.Read(currentBlock)
+		bytesread, err = byteReader.Read(currentBlock)
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -85,7 +86,7 @@ func TransmitByteStrings(transmitter ByteTransmitter, byteReader *bytes.Reader) 
 			return err
 		}
 
-		err = transmitter.Send(&common.ByteString{Chunk: currentBlock})
+		err = transmitter.Send(&common.ByteString{Chunk: currentBlock[:bytesread]})
 		if err != nil {
 			return fmt.Errorf("error sending bytes: %s", status.Convert(err).Message())
 		}
