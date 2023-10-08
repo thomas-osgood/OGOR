@@ -11,8 +11,9 @@ type AllCpuInfo struct {
 // structure designed to hold the information
 // related to a single CPU (processor) on a machine.
 type CpuInfo struct {
-	ProcessorModel string
-	ProcessorSpeed float64
+	ProcessorModel  string
+	ProcessorSpeed  float64
+	ProcessorVendor string
 }
 
 // structure designed to hold the information

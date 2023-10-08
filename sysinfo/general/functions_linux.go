@@ -68,6 +68,7 @@ func GetCPUInfo() (info AllCpuInfo, err error) {
 	var proccntpat string = "processor\\s+:\\s?[0-9]+"
 	var procmodpat string = "model\\sname\\s+:.*"
 	var procspdpat string = "cpu\\sMHz\\s+:\\s?[0-9.]+"
+	var procvenpat string = "vendor_id\\s+:.*"
 	var fptr *os.File
 	var idx int
 	var match []byte
@@ -79,6 +80,7 @@ func GetCPUInfo() (info AllCpuInfo, err error) {
 	var re *regexp.Regexp
 	var repm *regexp.Regexp
 	var reps *regexp.Regexp
+	var repv *regexp.Regexp
 	var splitmatch [][]byte
 	const target string = "/proc/cpuinfo"
 
@@ -130,6 +132,12 @@ func GetCPUInfo() (info AllCpuInfo, err error) {
 		return info, err
 	}
 
+	// setup regex to pull out the processor vendor
+	repv, err = regexp.Compile(procvenpat)
+	if err != nil {
+		return info, err
+	}
+
 	processors = bytes.Split(rawdata, []byte("\n\n"))
 	for idx, processor = range processors {
 		info.Cpus = append(info.Cpus, CpuInfo{})
@@ -146,6 +154,13 @@ func GetCPUInfo() (info AllCpuInfo, err error) {
 			splitmatch = bytes.Split(matches[0], []byte(":"))
 			match = bytes.TrimSpace(splitmatch[len(splitmatch)-1])
 			info.Cpus[idx].ProcessorSpeed, err = strconv.ParseFloat(string(match), 64)
+		}
+
+		matches = repv.FindAll(processor, -1)
+		if matches != nil {
+			splitmatch = bytes.Split(matches[0], []byte(":"))
+			match = bytes.TrimSpace(splitmatch[len(splitmatch)-1])
+			info.Cpus[idx].ProcessorVendor = string(match)
 		}
 	}
 
