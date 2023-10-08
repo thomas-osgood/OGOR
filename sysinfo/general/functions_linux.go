@@ -65,10 +65,11 @@ func EnumMounts() (mounts []MountInfo, err error) {
 // out information of interest. this will help give a
 // better understanding of the machine's CPU(s).
 func GetCPUInfo() (info AllCpuInfo, err error) {
-	var proccntpat string = "processor\\s+:\\s?[0-9]+"
-	var procmodpat string = "model\\sname\\s+:.*"
-	var procspdpat string = "cpu\\sMHz\\s+:\\s?[0-9.]+"
-	var procvenpat string = "vendor_id\\s+:.*"
+	const proccntpat string = "processor\\s+:\\s?[0-9]+"
+	const procmodpat string = "model\\sname\\s+:.*"
+	const procspdpat string = "cpu\\sMHz\\s+:\\s?[0-9.]+"
+	const procvenpat string = "vendor_id\\s+:.*"
+
 	var fptr *os.File
 	var idx int
 	var match []byte
