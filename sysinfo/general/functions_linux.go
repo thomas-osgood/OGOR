@@ -2,6 +2,7 @@ package general
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -31,7 +32,12 @@ func EnumMounts() (mounts []MountInfo, err error) {
 		return nil, err
 	}
 
-	outsplit = bytes.Split(bytes.TrimSpace(outbytes), []byte("\n"))
+	outbytes = bytes.TrimSpace(outbytes)
+	if len(outbytes) < 1 {
+		return nil, fmt.Errorf("no mounts discovered")
+	}
+
+	outsplit = bytes.Split(outbytes, []byte("\n"))
 
 	for _, outbytes = range outsplit {
 		line = string(bytes.TrimSpace(outbytes))
