@@ -11,6 +11,13 @@ import (
 	"strings"
 )
 
+// function designed to enumerate mounts on a windows
+// machine.
+func EnumMounts() (mounts []MountInfo, err error) {
+	mounts = make([]MountInfo, 0)
+	return mounts, nil
+}
+
 // function deisgned to read the cpuinfo file and pull
 // out information of interest. this will help give a
 // better understanding of the machine's CPU(s).
