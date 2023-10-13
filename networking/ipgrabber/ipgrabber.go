@@ -75,6 +75,39 @@ func (grabber *IPGrabber) GetFirstNonLoop() (iface string, err error) {
 	return iface, nil
 }
 
+// function designed to acquire all the mac addresses
+// that are assigned to a certain machine. this will
+// pull the information from the network interfaces.
+func (grabber *IPGrabber) GetMacAddresses() (macs []string, err error) {
+	var iface net.Interface
+
+	macs = make([]string, 0)
+
+	// make sure the grabber object has acquired at
+	// least one available network interface. if it
+	// has not, call GrabInterfaces and populate the
+	// interfaces slice.
+	if len(grabber.Interfaces) < 1 {
+		err = grabber.GrabInterfaces()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// loop through each discovered network interface
+	// and pull out the MAC address (HardwareAddr). if
+	// the MAC address is an empty string, ignore it and
+	// continue on to the next network interface.
+	for _, iface = range grabber.Interfaces {
+		if len(iface.HardwareAddr.String()) < 1 {
+			continue
+		}
+		macs = append(macs, iface.HardwareAddr.String())
+	}
+
+	return macs, nil
+}
+
 // function designed to populate/repopulate the Interfaces slice
 // of the IPGrabber struct by calling the net.Interfaces function.
 func (grabber *IPGrabber) GrabInterfaces() (err error) {
