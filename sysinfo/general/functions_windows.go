@@ -61,3 +61,49 @@ func GetCPUInfo() (info AllCpuInfo, err error) {
 
 	return info, nil
 }
+
+// function designed to grab the general system information
+// for a windows machine.
+func GetSysInfo() (info BasicSysInfo, err error) {
+	var cmd *exec.Cmd
+	var cmdstr string = "systeminfo"
+	var cmdarg []string = []string{"/fo", "csv", "/nh"}
+	var curline string
+	var hotfix string
+	var hotfixes []string
+	var i int
+	var outbytes []byte
+	var outsplit []string
+
+	info.OperatingSystem = OSInfo{}
+	info.OperatingSystem.Hotfixes = make([]string, 0)
+
+	cmd = exec.Command(cmdstr, cmdarg...)
+	outbytes, err = cmd.CombinedOutput()
+	if err != nil {
+		return BasicSysInfo{}, err
+	}
+
+	outsplit = strings.Split(string(outbytes), "\",")
+	for i = range outsplit {
+		outsplit[i] = strings.TrimLeft(outsplit[i], "\"")
+	}
+
+	// if there are hotfixes present, loop through them
+	// and add them to the Hotfixes slice.
+	hotfixes = strings.Split(outsplit[30], ",")
+	if len(hotfixes) > 1 {
+		for _, curline = range hotfixes[1:] {
+			hotfix = strings.TrimSpace(strings.Split(curline, ": ")[1])
+			info.OperatingSystem.Hotfixes = append(info.OperatingSystem.Hotfixes, hotfix)
+		}
+	}
+
+	info.Hostname = outsplit[0]
+	info.OperatingSystem.Name = outsplit[1]
+	info.OperatingSystem.Version = outsplit[2]
+	info.OperatingSystem.Manufacturer = outsplit[3]
+	info.OperatingSystem.Domain = outsplit[28]
+
+	return info, nil
+}
