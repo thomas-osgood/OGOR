@@ -170,3 +170,61 @@ func GetCPUInfo() (info AllCpuInfo, err error) {
 
 	return info, nil
 }
+
+// function designed to grab the general system information
+// for a linux machine.
+func GetSysInfo() (info BasicSysInfo, err error) {
+	var cmd *exec.Cmd
+	var cmdstr string = "cat"
+	var cmdarg []string = []string{"/etc/os-release"}
+	var curline string
+	var cursplit []string
+	var outbytes []byte
+	var outsplit []string
+
+	info.OperatingSystem = OSInfo{}
+	info.OperatingSystem.Hotfixes = make([]string, 0)
+
+	// dump the basic system information by catting the
+	// etc/os-release file and parsing out the desired info.
+	cmd = exec.Command(cmdstr, cmdarg...)
+	outbytes, err = cmd.CombinedOutput()
+	if err != nil {
+		return BasicSysInfo{}, err
+	}
+	outbytes = bytes.TrimSpace(outbytes)
+
+	outsplit = strings.Split(string(outbytes), "\n")
+
+	// parse the output of "cat /etc/os-release"
+	for _, curline = range outsplit {
+		cursplit = strings.Split(curline, "=")
+		switch strings.ToLower(cursplit[0]) {
+		case "name":
+			info.OperatingSystem.Name = cursplit[1]
+		case "version":
+			info.OperatingSystem.Version = cursplit[1]
+		case "id":
+			info.SystemId = cursplit[1]
+		}
+	}
+
+	// get the Domain the machine is assigned to by
+	// running the "hostname -d" command.
+	cmd = exec.Command("hostname", "-d")
+	outbytes, err = cmd.CombinedOutput()
+	if err != nil {
+		return BasicSysInfo{}, err
+	}
+	outbytes = bytes.TrimSpace(outbytes)
+
+	if len(outbytes) > 0 {
+		info.OperatingSystem.Domain = string(outbytes)
+	}
+
+	// the Manufacturer for the linux OS will be set
+	// to OpenSource it is an Open Source OS.
+	info.OperatingSystem.Manufacturer = "OpenSource"
+
+	return info, nil
+}
