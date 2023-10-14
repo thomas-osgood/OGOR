@@ -202,6 +202,13 @@ func GetSysInfo() (info BasicSysInfo, err error) {
 		// parse the output of "cat /etc/os-release"
 		for _, curline = range outsplit {
 			cursplit = strings.Split(curline, "=")
+
+			if len(cursplit) < 2 {
+				continue
+			}
+
+			cursplit[1] = strings.Trim(cursplit[1], "\"")
+
 			switch strings.ToLower(cursplit[0]) {
 			case "name":
 				info.OperatingSystem.Name = cursplit[1]
