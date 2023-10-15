@@ -18,6 +18,29 @@ func EnumMounts() (mounts []MountInfo, err error) {
 	return mounts, nil
 }
 
+// function designed to get the system architecture (32-bit or 64-bit)
+func GetArchitecture() (architecture string, err error) {
+	var cmd *exec.Cmd
+	var cmdstr string = "wmic"
+	var cmdarg []string = []string{"OS", "get", "OSArchitecture", "/VALUE"}
+	var outbytes []byte
+
+	cmd = exec.Command(cmdstr, cmdarg...)
+	outbytes, err = cmd.CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	outbytes = bytes.TrimSpace(outbytes)
+
+	if len(outbytes) < 1 {
+		return "", fmt.Errorf("no output. unable to determine architecture")
+	}
+
+	architecture = strings.Split(string(outbytes), "=")[1]
+
+	return architecture, nil
+}
+
 // function deisgned to read the cpuinfo file and pull
 // out information of interest. this will help give a
 // better understanding of the machine's CPU(s).
