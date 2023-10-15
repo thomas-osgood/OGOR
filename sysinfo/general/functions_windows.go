@@ -85,6 +85,41 @@ func GetCPUInfo() (info AllCpuInfo, err error) {
 	return info, nil
 }
 
+// function designed to get the kernel version.
+func GetKernelVersion() (version string, err error) {
+	var cmd *exec.Cmd
+	var cmdstr string = "systeminfo"
+	var matches [][]byte
+	var outbytes []byte
+	var re *regexp.Regexp
+	const searchpat string = `OS\sVersion:.*\n`
+
+	cmd = exec.Command(cmdstr)
+	outbytes, err = cmd.CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	outbytes = bytes.TrimSpace(outbytes)
+
+	if len(outbytes) < 1 {
+		return "", fmt.Errorf("no output. unable to determine kernel version")
+	}
+
+	re, err = regexp.Compile(searchpat)
+	if err != nil {
+		return "", err
+	}
+
+	matches = re.FindAll(outbytes, -1)
+	if matches == nil {
+		return "", fmt.Errorf("unable to find OS Version in SystemInfo")
+	}
+
+	version = strings.Split(strings.TrimSpace(strings.Split(string(matches[0]), ":")[1]), " ")[0]
+
+	return version, nil
+}
+
 // function designed to grab the general system information
 // for a windows machine.
 func GetSysInfo() (info BasicSysInfo, err error) {

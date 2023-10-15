@@ -194,6 +194,29 @@ func GetCPUInfo() (info AllCpuInfo, err error) {
 	return info, nil
 }
 
+// function designed to get the kernel version.
+func GetKernelVersion() (version string, err error) {
+	var cmd *exec.Cmd
+	var cmdstr string = "uname"
+	var cmdarg []string = []string{"-r"}
+	var outbytes []byte
+
+	cmd = exec.Command(cmdstr, cmdarg...)
+	outbytes, err = cmd.CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	outbytes = bytes.TrimSpace(outbytes)
+
+	if len(outbytes) < 1 {
+		return "", fmt.Errorf("no output. unable to determine kernel version")
+	}
+
+	version = string(outbytes)
+
+	return version, nil
+}
+
 // function designed to grab the general system information
 // for a linux machine.
 func GetSysInfo() (info BasicSysInfo, err error) {
