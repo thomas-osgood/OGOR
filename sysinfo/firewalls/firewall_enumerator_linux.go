@@ -63,9 +63,6 @@ func (fe *FirewallEnumerator) getServices() (err error) {
 	cmdctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
 	defer cancel()
 
-	cmdctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
-	defer cancel()
-
 	cmd = exec.CommandContext(cmdctx, command, commandargs...)
 	outbytes, err = cmd.Output()
 	if err != nil {
