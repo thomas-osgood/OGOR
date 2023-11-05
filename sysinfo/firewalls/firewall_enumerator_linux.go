@@ -42,6 +42,44 @@ func (fe *FirewallEnumerator) checkUFW() (active bool, err error) {
 	return active, nil
 }
 
+// function designed to determine whether the
+// firewall-cmd output indicates that any firewalls
+// are currently active.
+func (fe *FirewallEnumerator) checkFirewallCmd() (active bool, err error) {
+	var cancel context.CancelFunc
+	var cmd *exec.Cmd
+	var cmdctx context.Context
+	const command string = "firewall-cmd"
+	var commandargs []string = []string{"--state"}
+	var outbytes []byte
+	var outstring string
+
+	cmdctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
+	defer cancel()
+
+	cmd = exec.CommandContext(cmdctx, command, commandargs...)
+	outbytes, err = cmd.Output()
+	if err != nil {
+		return false, err
+	}
+
+	outstring = string(outbytes)
+	outstring = strings.TrimSpace(outstring)
+
+	// read the "firewall-cmd --state" output and
+	// set the active flag.
+	switch strings.ToLower(outstring) {
+	case "not running":
+		active = false
+	case "running":
+		active = true
+	default:
+		active = false
+	}
+
+	return active, nil
+}
+
 // function designed to grab all running services
 // the user can see and save the service name and
 // status in the services map.
