@@ -83,8 +83,10 @@ func (fe *FirewallEnumerator) ShowServices() (err error) {
 		return errors.New("no services discovered")
 	}
 
+	fe.printer.InfMsg(fmt.Sprintf("%-35s|%-10s", "service", "active"))
+	fe.printer.InfMsg(fe.formatter.PrintChar('-', 46))
 	for currentservice, currentstatus = range fe.services {
-		fe.printer.InfMsg(fmt.Sprintf("%s [%t]", currentservice, currentstatus))
+		fe.printer.InfMsg(fmt.Sprintf("%-35s|%t", currentservice, currentstatus))
 	}
 
 	return nil
