@@ -10,6 +10,7 @@ type enumBase int
 // conduct the firewall enumeration.
 type FirewallEnumerator struct {
 	firewalls map[string]enumBase
+	formatter *output.Formatter
 	printer   *output.Outputter
 	services  map[string]bool
 }
