@@ -2,7 +2,7 @@ package firewalls
 
 import (
 	"errors"
-	"log"
+	"fmt"
 	"strings"
 )
 
@@ -58,7 +58,7 @@ func (fe *FirewallEnumerator) ShowFirewallBinaries() (err error) {
 	}
 
 	for currentbinary = range fe.firewalls {
-		log.Printf("Binary: %s\n", currentbinary)
+		fe.printer.SucMsg(fmt.Sprintf("Binary: %s", currentbinary))
 	}
 
 	return nil
@@ -76,7 +76,7 @@ func (fe *FirewallEnumerator) ShowServices() (err error) {
 	}
 
 	for currentservice, currentstatus = range fe.services {
-		log.Printf("%s [%t]\n", currentservice, currentstatus)
+		fe.printer.InfMsg(fmt.Sprintf("%s [%t]", currentservice, currentstatus))
 	}
 
 	return nil

@@ -1,5 +1,7 @@
 package firewalls
 
+import "github.com/thomas-osgood/OGOR/output"
+
 // enum representing the possible statuses of
 // a firewall (disabled, enabled, unknown).
 type enumBase int
@@ -8,5 +10,6 @@ type enumBase int
 // conduct the firewall enumeration.
 type FirewallEnumerator struct {
 	firewalls map[string]enumBase
+	printer   *output.Outputter
 	services  map[string]bool
 }
