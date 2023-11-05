@@ -35,15 +35,23 @@ func (fe *FirewallEnumerator) CheckFirewalls() (activefirewalls []string, err er
 			active, err = fe.checkUFW()
 			if err != nil {
 				continue
-			} else if active {
-				fe.firewalls[currentBinary] = Enabled
-			} else {
-				fe.firewalls[currentBinary] = Disabled
+			}
+		case "fiewall-cmd":
+			active, err = fe.checkFirewallCmd()
+			if err != nil {
+				continue
 			}
 		default:
 			continue
 		}
+
+		if active {
+			fe.firewalls[currentBinary] = Enabled
+		} else {
+			fe.firewalls[currentBinary] = Disabled
+		}
 	}
+
 	return activefirewalls, nil
 }
 
