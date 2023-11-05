@@ -2,10 +2,6 @@ package firewalls
 
 import "time"
 
-// constant array holds the common binaries
-// used for firewall administration.
-var targetbinaries = [...]string{"firewall-cmd", "iptables", "ufw"}
-
 // default timeout used in commands.
 const DefaultTimeout time.Duration = 10 * time.Second
 
