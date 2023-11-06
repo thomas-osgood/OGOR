@@ -89,7 +89,7 @@ func (fe *FirewallEnumerator) EnumBinaries() (err error) {
 	// than zero after the space has been trimmed, it will be appended
 	// to the binaries slice.
 	for _, currentbin = range targetbinaries {
-		enumarguments[0] = currentbin
+		enumarguments[len(enumarguments)-1] = currentbin
 
 		cmdctx, cancel = context.WithTimeout(context.Background(), cmdtimeout)
 		defer cancel()
