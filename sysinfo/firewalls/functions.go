@@ -6,7 +6,10 @@ import "github.com/thomas-osgood/OGOR/output"
 // FirewallEnumerator object that can be used by the
 // end-user. this returns a pointer to the newly
 // created object and an error (nil if successful).
-func NewFirewallEnumerator() (enumerator *FirewallEnumerator, err error) {
+func NewFirewallEnumerator(optFuncs ...FirewallEnumOptFunc) (enumerator *FirewallEnumerator, err error) {
+	var defaultOptions FirewallEnumOptions = FirewallEnumOptions{DisplayErrors: true}
+	var fn FirewallEnumOptFunc
+
 	enumerator = new(FirewallEnumerator)
 
 	// create the outputter object. this will be used
@@ -33,5 +36,29 @@ func NewFirewallEnumerator() (enumerator *FirewallEnumerator, err error) {
 	// read from, it.
 	enumerator.services = make(map[string]bool)
 
+	// go through the options set by the user and set
+	// the variables of the new FirewallEnumerator based
+	// on the user's input(s).
+	for _, fn = range optFuncs {
+		err = fn(&defaultOptions)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// set the new enumerator variable values based on
+	// the user input.
+	enumerator.displayErrors = defaultOptions.DisplayErrors
+
 	return enumerator, nil
+}
+
+// function designed to turn off the error output for
+// a FirewallEnumerator. this will not show non-critical
+// errors when the occur; they will just be ignored and
+// the function will continue without signaling to the
+// user that something went wrong.
+func ErrorOutputOff(opts FirewallEnumOptions) error {
+	opts.DisplayErrors = false
+	return nil
 }
