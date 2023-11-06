@@ -4,19 +4,16 @@
 package firewalls
 
 // function designed to determine whether the
-// Uncomplicated Firewall (UFW) is currently
-// active on the machine.
+// discovered firewall(s) are active. if the
+// firewall binary requires sudo (elevated)
+// privileges and the command errors out, the
+// next discovered firewall will be checked.
 //
-// this will return a boolean indication of
-// active, along with an error. if everything
-// executes as expected, the error will be nil.
-func (fe *FirewallEnumerator) checkUFW() (active bool, err error) {
-	return false, nil
-}
-
-// function designed to grab all running services
-// the user can see and save the service name and
-// status in the services map.
-func (fe *FirewallEnumerator) getServices() (err error) {
-	return nil
+// the firewall binaries that error out will be
+// kept track of and an error will be raised if
+// no firewalls were found to be running but at
+// least one error occurred during testing.
+func (fe *FirewallEnumerator) CheckFirewalls() (activefirewalls []string, err error) {
+	activefirewalls = make([]string, 0)
+	return activefirewalls, nil
 }
