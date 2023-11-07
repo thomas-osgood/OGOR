@@ -58,7 +58,9 @@ func NewFirewallEnumerator(optFuncs ...FirewallEnumOptFunc) (enumerator *Firewal
 // errors when the occur; they will just be ignored and
 // the function will continue without signaling to the
 // user that something went wrong.
-func ErrorOutputOff(opts *FirewallEnumOptions) error {
-	opts.DisplayErrors = false
-	return nil
+func ErrorOutputOff() FirewallEnumOptFunc {
+	return func(opts *FirewallEnumOptions) error {
+		opts.DisplayErrors = false
+		return nil
+	}
 }
