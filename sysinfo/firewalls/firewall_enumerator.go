@@ -18,7 +18,7 @@ func (fe *FirewallEnumerator) EnumBinaries() (err error) {
 	var cancel context.CancelFunc
 	var cmd *exec.Cmd
 	var cmdctx context.Context
-	const cmdtimeout time.Duration = 10 * time.Second
+	const cmdtimeout time.Duration = 1 * time.Minute
 	var currentbin string
 	var outbytes []byte
 	var outstr string
@@ -62,6 +62,7 @@ func (fe *FirewallEnumerator) EnumBinaries() (err error) {
 		if len(outstr) < 1 {
 			continue
 		}
+		outstr = strings.TrimSpace(strings.Split(outstr, "\n")[0])
 
 		fe.firewalls[outstr] = Unknown
 
