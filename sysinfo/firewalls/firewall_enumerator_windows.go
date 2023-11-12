@@ -60,6 +60,45 @@ func (fe *FirewallEnumerator) checkFirewallState() (active bool, err error) {
 	return active, nil
 }
 
+// function designed to get all the running services on
+// the current machine.
+func (fe *FirewallEnumerator) getServices() (err error) {
+	var cancel context.CancelFunc
+	var cmd *exec.Cmd
+	var cmdctx context.Context
+	const command string = "net"
+	var commandargs []string = []string{"start"}
+	var currentline string
+	var outbytes []byte
+	var outstring string
+	var outstringlines []string
+
+	cmdctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
+	defer cancel()
+
+	cmd = exec.CommandContext(cmdctx, command, commandargs...)
+	outbytes, err = cmd.Output()
+	if err != nil {
+		return err
+	}
+
+	outstring = string(outbytes)
+	outstring = strings.TrimSpace(outstring)
+
+	outstringlines = strings.Split(outstring, "\n")
+	outstringlines = outstringlines[:len(outstringlines)-2]
+
+	for _, currentline = range outstringlines {
+		if len(strings.TrimSpace(currentline)) == 0 {
+			continue
+		}
+
+		fe.services[strings.TrimSpace(currentline)] = true
+	}
+
+	return nil
+}
+
 // function designed to determine whether the
 // discovered firewall(s) are active. if the
 // firewall binary requires sudo (elevated)
@@ -81,7 +120,7 @@ func (fe *FirewallEnumerator) CheckFirewalls() (activefirewalls []string, err er
 	}
 
 	if active {
-		activefirewalls = append(activefirewalls, "Windows Defender")
+		activefirewalls = append(activefirewalls, "Windows Defender Firewall")
 	}
 
 	return activefirewalls, nil
