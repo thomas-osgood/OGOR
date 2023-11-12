@@ -9,4 +9,4 @@ const enumcommand string = "where"
 
 // constant array holds the common binaries
 // used for firewall administration.
-var targetbinaries = [...]string{}
+var targetbinaries = [...]string{"mpcmdrun.exe"}
