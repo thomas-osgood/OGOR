@@ -64,14 +64,33 @@ func (fe *FirewallEnumerator) checkFirewallState() (active bool, err error) {
 // the current machine.
 func (fe *FirewallEnumerator) getServices() (err error) {
 	var cancel context.CancelFunc
+	var checkcmd *exec.Cmd
+	var clsplit []string
 	var cmd *exec.Cmd
 	var cmdctx context.Context
-	const command string = "net"
-	var commandargs []string = []string{"start"}
+	const command string = "sc"
+	var commandargs []string = []string{"query"}
 	var currentline string
 	var outbytes []byte
 	var outstring string
 	var outstringlines []string
+	var splitstate []string
+	var statematches []string
+	const statepat string = "STATE\\s+:\\s[0-9]\\s+[a-zA-Z]+"
+	var statereg *regexp.Regexp
+	var state string
+	const svcpat string = "SERVICE_NAME:\\s+.*"
+	var svcreg *regexp.Regexp
+
+	statereg, err = regexp.Compile(statepat)
+	if err != nil {
+		return err
+	}
+
+	svcreg, err = regexp.Compile(svcpat)
+	if err != nil {
+		return err
+	}
 
 	cmdctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
 	defer cancel()
@@ -85,15 +104,42 @@ func (fe *FirewallEnumerator) getServices() (err error) {
 	outstring = string(outbytes)
 	outstring = strings.TrimSpace(outstring)
 
-	outstringlines = strings.Split(outstring, "\n")
-	outstringlines = outstringlines[:len(outstringlines)-2]
+	outstringlines = svcreg.FindAllString(outstring, -1)
+	if outstringlines == nil {
+		return fmt.Errorf("no services discovered")
+	}
 
 	for _, currentline = range outstringlines {
-		if len(strings.TrimSpace(currentline)) == 0 {
+		currentline = strings.TrimSpace(currentline)
+		if len(currentline) == 0 {
+			continue
+		}
+		clsplit = strings.Split(strings.Split(currentline, ":")[1], " ")
+		currentline = strings.TrimSpace(clsplit[len(clsplit)-1])
+
+		checkcmd = exec.Command("sc", "query", currentline)
+		outbytes, err = checkcmd.Output()
+		if err != nil {
+			fe.services[currentline] = false
 			continue
 		}
 
-		fe.services[strings.TrimSpace(currentline)] = true
+		statematches = statereg.FindAllString(string(outbytes), -1)
+		if statematches == nil {
+			fe.services[currentline] = false
+			continue
+		}
+
+		// list of states to check for in future:
+		// https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status
+		state = strings.TrimSpace(strings.Split(statematches[0], ":")[1])
+		splitstate = strings.Split(state, " ")
+		state = strings.TrimSpace(splitstate[len(splitstate)-1])
+		if state == "RUNNING" {
+			fe.services[currentline] = true
+		} else {
+			fe.services[currentline] = false
+		}
 	}
 
 	return nil
