@@ -83,7 +83,12 @@ func (f *Forwarder) openTunnel(w http.ResponseWriter, r *http.Request) (err erro
 	go f.makeTunnelConnection(client_conn, dest_conn)
 	go f.makeTunnelConnection(dest_conn, client_conn)
 
-	log.Printf("\"%s\" <----> \"%s%s\"", r.RemoteAddr, r.URL.Host, r.URL.Path)
+	// only display tunnel connections if the logging
+	// flag has been set. this is set by default when
+	// initializing the Forwarder object.
+	if f.logging {
+		log.Printf("\"%s\" <----> \"%s%s\"", r.RemoteAddr, r.URL.Host, r.URL.Path)
+	}
 
 	return nil
 }
