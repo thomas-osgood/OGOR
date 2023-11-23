@@ -9,6 +9,7 @@ import (
 type Forwarder struct {
 	// transport to use to transmit the requests.
 	forwardTransport http.RoundTripper
+	logging          bool
 	portno           int
 	server           *http.Server
 }
@@ -18,8 +19,11 @@ type Forwarder struct {
 type ForwarderOptions struct {
 	// transport to use to transmit the requests.
 	ForwardTransport http.RoundTripper
+	// flag indicating whether to log traffic to STDOUT.
+	// this flag is set by default.
+	Logging bool
 	// port to host the forwarder on.
 	Portno int
-	// server to use to server the forwarder.
+	// server to use to serve the forwarder.
 	Server *http.Server
 }

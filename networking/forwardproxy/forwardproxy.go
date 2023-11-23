@@ -117,9 +117,14 @@ func (f *Forwarder) transmitRequest(w http.ResponseWriter, r *http.Request) (err
 		log.Printf(err.Error())
 	}
 
-	err = f.displayRequestInfo(r)
-	if err != nil {
-		return apis.ReturnErrorJSON(&w, 500, err.Error())
+	// only print information to STDOUT if the logging
+	// flag is set. if the user selected NoLogging when
+	// creating the forwarder, this will not execute.
+	if f.logging {
+		err = f.displayRequestInfo(r)
+		if err != nil {
+			return apis.ReturnErrorJSON(&w, 500, err.Error())
+		}
 	}
 
 	// make a new request object to send to the target.

@@ -20,6 +20,7 @@ func NewForwarder(userOptions ...ForwarderOptionsFunc) (forwarder *Forwarder, er
 	forwarder = new(Forwarder)
 
 	defaultOptions.ForwardTransport = defaultTransport
+	defaultOptions.Logging = true
 	defaultOptions.Portno = DEFAULT_PORTNO
 	defaultOptions.Server = &http.Server{}
 
@@ -45,10 +46,20 @@ func NewForwarder(userOptions ...ForwarderOptionsFunc) (forwarder *Forwarder, er
 	//////////////////////////////////////////////////////////////
 
 	forwarder.forwardTransport = defaultOptions.ForwardTransport
+	forwarder.logging = defaultOptions.Logging
 	forwarder.portno = defaultOptions.Portno
 	forwarder.server = defaultOptions.Server
 
 	return forwarder, nil
+}
+
+// function designed to clear the Logging flag for the
+// forwarder. this will turn off logging traffic to STDOUT.
+func NoLogging() ForwarderOptionsFunc {
+	return func(fo *ForwarderOptions) error {
+		fo.Logging = false
+		return nil
+	}
 }
 
 // function designed to set the serve port for the forwarder.
@@ -67,9 +78,13 @@ func UseServePort(portno int) ForwarderOptionsFunc {
 	}
 }
 
-// function designed to set the API Middlware Controller
+// function designed to set the transport object
 // for the forwarder. this can be passed to the NewForwarder
 // function during creation of a new object.
+//
+// this transport object is responsible for taking
+// the incoming request and forwarding it onto the
+// target destination.
 func UseTransport(transport http.RoundTripper) ForwarderOptionsFunc {
 	return func(fo *ForwarderOptions) error {
 		fo.ForwardTransport = transport
