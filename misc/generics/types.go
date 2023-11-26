@@ -37,8 +37,9 @@ type SpecialString[T StringTypes] interface {
 	AppendChar(rune) T
 }
 
-// generic definition of a string object. this
-// interface includes strings and string slices.
+// generic definition of a SearchObject. this outlines
+// the functions a struct must have for it to be considered
+// this type of generic.
 type SearchObject[T SearchType, O SearchObjectTypes] interface {
 	// function designed to append to a
 	// SearchObjectType.
