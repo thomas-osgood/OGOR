@@ -1,11 +1,11 @@
 package generators
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"sync"
-	"time"
 
 	"github.com/thomas-osgood/OGOR/networking/proxyscrape"
 )
@@ -15,8 +15,12 @@ import (
 // can be useful for generating random file names or unique
 // usernames and passwords.
 func GenRandomName(minlen int, maxlen int) (randstr string, err error) {
+	var baseval *big.Int
+	var biglen *big.Int
+	var bigmin *big.Int
 	const charset string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	var length int
+	var randidx *big.Int
 
 	// validate min/max parameters
 	if (minlen <= 0) || (maxlen <= 0) {
@@ -25,14 +29,41 @@ func GenRandomName(minlen int, maxlen int) (randstr string, err error) {
 		return "", errors.New("min length must be less than or equal to max length")
 	}
 
-	rand.Seed(time.Now().UnixMicro())
+	// this is the number that will be used to generate
+	// the random number. this is the difference of the
+	// max value and min value because the final random
+	// number will be calculated by adding the min value
+	// so the number falls within the range MIN <= x <= MAX.
+	baseval = big.NewInt(int64(maxlen - minlen))
 
-	length = minlen + rand.Intn(maxlen-minlen)
+	// convert the minimum value to a big.Int so it can be
+	// used to adjust the randomly generated length.
+	bigmin = big.NewInt(int64(minlen))
+
+	// use the crypto/rand library to generate a length
+	// for the string.
+	biglen, err = rand.Int(rand.Reader, big.NewInt(baseval.Int64()))
+	if err != nil {
+		return "", fmt.Errorf("error generating the length: %s", err)
+	}
+
+	// adjust the generated number to fit within the range.
+	biglen = biglen.Add(biglen, bigmin)
+
+	length = int(biglen.Int64())
 
 	randstr = ""
 
 	for i := 0; i < length; i++ {
-		randstr = fmt.Sprintf("%s%s", randstr, string(charset[rand.Intn(len(charset))]))
+		// calculate the random index to choose. if
+		// there is an error, choose index 0.
+		randidx, err = rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			randidx = big.NewInt(0)
+		}
+		// append the char at the randomly generated
+		// index to the randomly generated string.
+		randstr = fmt.Sprintf("%s%c", randstr, charset[randidx.Int64()])
 	}
 
 	return randstr, nil
