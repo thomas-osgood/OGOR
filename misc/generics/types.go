@@ -25,18 +25,6 @@ type StringTypes interface {
 	SearchableString | SearchableStringSlice
 }
 
-// type definition outlining the definition of custom
-// strings. these string types will share common
-// functionality via this interface.
-type SpecialString[T StringTypes] interface {
-	// function designed to append a string to the end
-	// of another searchable string or string slice.
-	Append(string) T
-	// function designed to append a char to the end of
-	// a searchable string or string slice.
-	AppendChar(rune) T
-}
-
 // generic definition of a SearchObject. this outlines
 // the functions a struct must have for it to be considered
 // this type of generic.
