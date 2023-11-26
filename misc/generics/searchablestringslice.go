@@ -18,15 +18,10 @@ func (ss SearchableStringSlice) AppendChar(target rune) (newslice SearchableStri
 }
 
 // function designed to search through a searchablestring
-// and determine if the target rune (char) is in it.
+// and determine if the target string is in it.
 func (ss SearchableStringSlice) In(target string) (err error) {
 	var current string
 	var found bool
-
-	// make sure only a single character is passed in.
-	if len(target) != 1 {
-		return fmt.Errorf("can only search for a single char.")
-	}
 
 	// loop over each character in the string and compare
 	// it to the target char. if a match is found, set the
@@ -47,7 +42,7 @@ func (ss SearchableStringSlice) In(target string) (err error) {
 	return nil
 }
 
-// function designed to find the index of a given char.
+// function designed to find the index of a given string.
 func (ss SearchableStringSlice) IndexOf(target string) (idx int, err error) {
 	// make sure the target is in the string before
 	// looping through to grab the index.
