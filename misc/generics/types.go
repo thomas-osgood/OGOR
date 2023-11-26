@@ -16,7 +16,7 @@ type SearchType interface {
 	//
 	// this allows all custom types listed above to share
 	// the same basic functionality and interfaces.
-	int32 | int64 | string
+	int | int32 | int64 | string
 }
 
 type StringTypes interface {
@@ -59,7 +59,11 @@ type Int64Object interface {
 	SearchableInt64 | SearchableInt64Slice
 }
 
-// definition of a custom type of int32 slice
+// definition of a custom type of int slice
+// that fits a SearchableObject definition.
+type SearchableIntSlice []int
+
+// definition of a custom type of int32
 // that fits a SearchableObject definition.
 type SearchableInt32 int32
 
@@ -67,7 +71,7 @@ type SearchableInt32 int32
 // that fits a SearchableObject definition.
 type SearchableInt32Slice []int32
 
-// definition of a custom type of int64 slice
+// definition of a custom type of int64
 // that fits a SearchableObject definition.
 type SearchableInt64 int64
 
