@@ -55,14 +55,10 @@ func GenRandomName(minlen int, maxlen int) (randstr string, err error) {
 	randstr = ""
 
 	for i := 0; i < length; i++ {
-		// calculate the random index to choose. if
-		// there is an error, choose index 0.
 		randidx, err = rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
 		if err != nil {
 			randidx = big.NewInt(0)
 		}
-		// append the char at the randomly generated
-		// index to the randomly generated string.
 		randstr = fmt.Sprintf("%s%c", randstr, charset[randidx.Int64()])
 	}
 
