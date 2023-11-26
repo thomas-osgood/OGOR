@@ -62,7 +62,7 @@ func (si SearchableIntSlice) IndexOf(target int) (idx int, err error) {
 }
 
 // function designed to return the string representation of
-// the given int64 slice.
+// the given int slice.
 func (si SearchableIntSlice) String() string {
 	var current int
 	var stringSlice []string = make([]string, 0)
