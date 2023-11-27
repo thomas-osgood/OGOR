@@ -4,7 +4,7 @@ type SearchObjectTypes interface {
 	// interface outlining the various types of SearchObjects
 	// that exist. this is used in the definition of the
 	// SearchObject interface to make it generic.
-	StringTypes | Int32Object | Int64Object
+	StringTypes | Int32Object | Int64Object | IntObject
 }
 
 type SearchType interface {
@@ -47,6 +47,12 @@ type SearchObject[T SearchType, O SearchObjectTypes] interface {
 	String() string
 }
 
+type IntObject interface {
+	// generic definition of an int object. this
+	// interface includes int and int slices.
+	SearchableInt | SearchableIntSlice
+}
+
 type Int32Object interface {
 	// generic definition of an int32 object. this
 	// interface includes int32 and int32 slices.
@@ -58,6 +64,10 @@ type Int64Object interface {
 	// interface includes int64 and int64 slices.
 	SearchableInt64 | SearchableInt64Slice
 }
+
+// definition of a custom type of int
+// that fits a SearchableObject definition.
+type SearchableInt int
 
 // definition of a custom type of int slice
 // that fits a SearchableObject definition.
