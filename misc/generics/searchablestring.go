@@ -65,6 +65,17 @@ func (ss SearchableString) IndexOf(target rune) (idx int, err error) {
 	return idx, nil
 }
 
+// function designed to return the length of the object.
+// this will loop throught the object and iterate a counter,
+// returning the number of elements present in the string
+// representation of the object.
+func (ss SearchableString) Length() (count int) {
+	for range ss {
+		count++
+	}
+	return count
+}
+
 func (ss SearchableString) String() string {
 	return string(ss)
 }

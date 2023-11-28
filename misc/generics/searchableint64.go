@@ -73,6 +73,17 @@ func (si64 SearchableInt64) IndexOf(target int64) (idx int, err error) {
 	return idx, nil
 }
 
+// function designed to return the length of the object.
+// this will loop throught the object and iterate a counter,
+// returning the number of elements present in the string
+// representation of the object.
+func (si64 SearchableInt64) Length() (count int) {
+	for range si64.String() {
+		count++
+	}
+	return count
+}
+
 // function designed to return the string representation of
 // the given int64 slice.
 func (si64 SearchableInt64) String() string {
