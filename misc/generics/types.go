@@ -1,5 +1,11 @@
 package generics
 
+type CustomSlice interface {
+	// interface restricting the type to the custom slices
+	// that are defined within this document.
+	SearchableStringSlice | SearchableInt32Slice | SearchableInt64Slice | SearchableIntSlice
+}
+
 type SearchObjectTypes interface {
 	// interface outlining the various types of SearchObjects
 	// that exist. this is used in the definition of the
@@ -42,9 +48,20 @@ type SearchObject[T SearchType, O SearchObjectTypes] interface {
 	// an error will be returned along with a
 	// negative number.
 	IndexOf(T) (int, error)
+	// function designed to get the length of the object.
+	Length() int
 	// function designed to return the string
 	// representstion of the given object.
 	String() string
+}
+
+// generic definition of a slice that has certain, custom
+// functions attached to it.
+type SpecialSlice[T CustomSlice] interface {
+	// function designed to combine two custom slices.
+	// this will append the target object to the object
+	// calling the Combine function.
+	Combine(T) T
 }
 
 type IntObject interface {
