@@ -25,7 +25,7 @@ func (si64 SearchableInt64Slice) Combine(target SearchableInt64Slice) (newslice 
 		var current int64
 
 		newslice = si64
-		for _, current = range si64 {
+		for _, current = range target {
 			newslice = newslice.Append(current)
 		}
 	}

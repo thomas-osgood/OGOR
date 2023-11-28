@@ -25,7 +25,7 @@ func (si32 SearchableInt32Slice) Combine(target SearchableInt32Slice) (newslice 
 		var current int32
 
 		newslice = si32
-		for _, current = range si32 {
+		for _, current = range target {
 			newslice = newslice.Append(current)
 		}
 	}
