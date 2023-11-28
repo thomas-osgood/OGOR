@@ -92,7 +92,7 @@ func (si32 SearchableInt32Slice) Length() (count int) {
 }
 
 // function designed to return the string representation of
-// the given int64 slice.
+// the given int32 slice.
 func (si32 SearchableInt32Slice) String() string {
 	var current int32
 	var stringSlice []string = make([]string, 0)

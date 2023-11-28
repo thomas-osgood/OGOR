@@ -85,7 +85,7 @@ func (si64 SearchableInt64) Length() (count int) {
 }
 
 // function designed to return the string representation of
-// the given int64 slice.
+// the given searchable int64.
 func (si64 SearchableInt64) String() string {
 	return fmt.Sprintf("%d", si64)
 }
