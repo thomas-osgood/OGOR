@@ -12,6 +12,26 @@ func (si SearchableIntSlice) Append(target int) (newslice SearchableIntSlice) {
 	return newslice
 }
 
+// function designed to combine two SearchableIntSlices.
+// this will append the entire target slice to the one it
+// it being combined with.
+func (si SearchableIntSlice) Combine(target SearchableIntSlice) (newslice SearchableIntSlice) {
+	switch {
+	case target.Length() < 1:
+		newslice = si
+	case si.Length() < 1:
+		newslice = target
+	default:
+		var current int
+
+		newslice = si
+		for _, current = range si {
+			newslice = newslice.Append(current)
+		}
+	}
+	return newslice
+}
+
 // function designed to determine if the given
 // int is in the int slice.
 func (si SearchableIntSlice) In(target int) (err error) {
@@ -61,8 +81,18 @@ func (si SearchableIntSlice) IndexOf(target int) (idx int, err error) {
 	return idx, nil
 }
 
+// function designed to return the length of the array/slice.
+// this will loop throught the slice and iterate a counter,
+// returning the number of elements present in the slice.
+func (si SearchableIntSlice) Length() (count int) {
+	for range si {
+		count++
+	}
+	return count
+}
+
 // function designed to return the string representation of
-// the given int slice.
+// the given int64 slice.
 func (si SearchableIntSlice) String() string {
 	var current int
 	var stringSlice []string = make([]string, 0)

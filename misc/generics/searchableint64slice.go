@@ -12,6 +12,26 @@ func (si64 SearchableInt64Slice) Append(target int64) (newslice SearchableInt64S
 	return newslice
 }
 
+// function designed to combine two SearchableInt64Slices.
+// this will append the entire target slice to the one it
+// it being combined with.
+func (si64 SearchableInt64Slice) Combine(target SearchableInt64Slice) (newslice SearchableInt64Slice) {
+	switch {
+	case target.Length() < 1:
+		newslice = si64
+	case si64.Length() < 1:
+		newslice = target
+	default:
+		var current int64
+
+		newslice = si64
+		for _, current = range si64 {
+			newslice = newslice.Append(current)
+		}
+	}
+	return newslice
+}
+
 // function designed to determine if the given
 // int64 is in the int64 slice.
 func (si64 SearchableInt64Slice) In(target int64) (err error) {
@@ -59,6 +79,16 @@ func (si64 SearchableInt64Slice) IndexOf(target int64) (idx int, err error) {
 	}
 
 	return idx, nil
+}
+
+// function designed to return the length of the array/slice.
+// this will loop throught the slice and iterate a counter,
+// returning the number of elements present in the slice.
+func (si64 SearchableInt64Slice) Length() (count int) {
+	for range si64 {
+		count++
+	}
+	return count
 }
 
 // function designed to return the string representation of

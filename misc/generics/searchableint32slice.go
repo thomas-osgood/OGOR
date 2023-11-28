@@ -12,6 +12,26 @@ func (si32 SearchableInt32Slice) Append(target int32) (newslice SearchableInt32S
 	return newslice
 }
 
+// function designed to combine two SearchableInt32Slices.
+// this will append the entire target slice to the one it
+// it being combined with.
+func (si32 SearchableInt32Slice) Combine(target SearchableInt32Slice) (newslice SearchableInt32Slice) {
+	switch {
+	case target.Length() < 1:
+		newslice = si32
+	case si32.Length() < 1:
+		newslice = target
+	default:
+		var current int32
+
+		newslice = si32
+		for _, current = range si32 {
+			newslice = newslice.Append(current)
+		}
+	}
+	return newslice
+}
+
 // function designed to determine if the given
 // int32 is in the int32 slice.
 func (si32 SearchableInt32Slice) In(target int32) (err error) {
@@ -61,8 +81,18 @@ func (si32 SearchableInt32Slice) IndexOf(target int32) (idx int, err error) {
 	return idx, nil
 }
 
+// function designed to return the length of the array/slice.
+// this will loop throught the slice and iterate a counter,
+// returning the number of elements present in the slice.
+func (si32 SearchableInt32Slice) Length() (count int) {
+	for range si32 {
+		count++
+	}
+	return count
+}
+
 // function designed to return the string representation of
-// the given int32 slice.
+// the given int64 slice.
 func (si32 SearchableInt32Slice) String() string {
 	var current int32
 	var stringSlice []string = make([]string, 0)

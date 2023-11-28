@@ -17,6 +17,26 @@ func (ss SearchableStringSlice) AppendChar(target rune) (newslice SearchableStri
 	return append(ss, fmt.Sprintf("%c", target))
 }
 
+// function designed to combine two SearchableStringSlice.
+// this will append the entire target slice to the one it
+// it being combined with.
+func (ss SearchableStringSlice) Combine(target SearchableStringSlice) (newslice SearchableStringSlice) {
+	switch {
+	case target.Length() < 1:
+		newslice = ss
+	case ss.Length() < 1:
+		newslice = target
+	default:
+		var current string
+
+		newslice = ss
+		for _, current = range ss {
+			newslice = newslice.Append(current)
+		}
+	}
+	return newslice
+}
+
 // function designed to search through a searchablestring
 // and determine if the target string is in it.
 func (ss SearchableStringSlice) In(target string) (err error) {
@@ -61,6 +81,16 @@ func (ss SearchableStringSlice) IndexOf(target string) (idx int, err error) {
 	}
 
 	return idx, nil
+}
+
+// function designed to return the length of the array/slice.
+// this will loop throught the slice and iterate a counter,
+// returning the number of elements present in the slice.
+func (ss SearchableStringSlice) Length() (count int) {
+	for range ss {
+		count++
+	}
+	return count
 }
 
 // function designed to sort the SearchableStringSlice
