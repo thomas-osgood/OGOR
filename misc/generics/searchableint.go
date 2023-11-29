@@ -22,6 +22,13 @@ func (si SearchableInt) Append(target int) (newslice SearchableInt) {
 	return newslice
 }
 
+// function designed to reset the object to
+// the state it is when initialized. this will
+// set numbers to zero.
+func (si SearchableInt) Clear() SearchableInt {
+	return 0
+}
+
 // function designed to determine if the given
 // int is in the int.
 func (si SearchableInt) In(target int) (err error) {

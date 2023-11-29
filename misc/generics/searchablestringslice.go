@@ -17,6 +17,12 @@ func (ss SearchableStringSlice) AppendChar(target rune) (newslice SearchableStri
 	return append(ss, fmt.Sprintf("%c", target))
 }
 
+// function designed to clear the slice and return an
+// empty slice.
+func (ss SearchableStringSlice) Clear() SearchableStringSlice {
+	return []string{}
+}
+
 // function designed to combine two SearchableStringSlice.
 // this will append the entire target slice to the one it
 // it being combined with.

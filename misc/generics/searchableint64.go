@@ -22,6 +22,13 @@ func (si64 SearchableInt64) Append(target int64) (newslice SearchableInt64) {
 	return newslice
 }
 
+// function designed to reset the object to
+// the state it is when initialized. this will
+// set numbers to zero.
+func (si64 SearchableInt64) Clear() SearchableInt64 {
+	return 0
+}
+
 // function designed to determine if the given
 // int64 is in the int64.
 func (si64 SearchableInt64) In(target int64) (err error) {

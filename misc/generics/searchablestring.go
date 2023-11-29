@@ -14,9 +14,11 @@ func (ss SearchableString) AppendString(target string) (newslice SearchableStrin
 	return SearchableString(fmt.Sprintf("%s%s", ss.String(), target))
 }
 
-// function designed to append a char to the string.
-func (ss SearchableString) AppendChar(target rune) (newslice SearchableString) {
-	return SearchableString(fmt.Sprintf("%s%c", ss.String(), target))
+// function designed to reset the object to
+// the state it is when initialized. this will
+// set strings to "".
+func (ss SearchableString) Clear() SearchableString {
+	return ""
 }
 
 // function designed to search through a searchablestring

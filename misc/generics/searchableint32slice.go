@@ -12,6 +12,12 @@ func (si32 SearchableInt32Slice) Append(target int32) (newslice SearchableInt32S
 	return newslice
 }
 
+// function designed to clear the slice and return an
+// empty slice.
+func (si32 SearchableInt32Slice) Clear() SearchableInt32Slice {
+	return []int32{}
+}
+
 // function designed to combine two SearchableInt32Slices.
 // this will append the entire target slice to the one it
 // it being combined with.

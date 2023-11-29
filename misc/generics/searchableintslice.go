@@ -12,6 +12,12 @@ func (si SearchableIntSlice) Append(target int) (newslice SearchableIntSlice) {
 	return newslice
 }
 
+// function designed to clear the slice and return an
+// empty slice.
+func (si SearchableIntSlice) Clear() SearchableIntSlice {
+	return []int{}
+}
+
 // function designed to combine two SearchableIntSlices.
 // this will append the entire target slice to the one it
 // it being combined with.

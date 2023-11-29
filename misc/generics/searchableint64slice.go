@@ -12,6 +12,12 @@ func (si64 SearchableInt64Slice) Append(target int64) (newslice SearchableInt64S
 	return newslice
 }
 
+// function designed to clear the slice and return an
+// empty slice.
+func (si64 SearchableInt64Slice) Clear() SearchableInt64Slice {
+	return []int64{}
+}
+
 // function designed to combine two SearchableInt64Slices.
 // this will append the entire target slice to the one it
 // it being combined with.

@@ -22,6 +22,13 @@ func (si32 SearchableInt32) Append(target int32) (newslice SearchableInt32) {
 	return newslice
 }
 
+// function designed to reset the object to
+// the state it is when initialized. this will
+// set numbers to zero.
+func (si32 SearchableInt32) Clear() SearchableInt32 {
+	return 0
+}
+
 // function designed to determine if the given
 // int32 is in the int32.
 func (si32 SearchableInt32) In(target int32) (err error) {

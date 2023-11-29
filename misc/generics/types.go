@@ -38,6 +38,16 @@ type SearchObject[T SearchType, O SearchObjectTypes] interface {
 	// function designed to append to a
 	// SearchObjectType.
 	Append(T) O
+	// function designed to clear/reset the object
+	// to the value it is when initialized. for
+	// slices, it will remove all elements from
+	// the slice, it will zero out a string, and
+	// set numbers to 0.
+	//
+	// example call:
+	//
+	//	searchableint32 = searchableint32.Clear()
+	Clear() O
 	// function that determines whether the
 	// value passed in is within the searcher
 	// object. if it does not exist, an error
