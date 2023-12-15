@@ -11,6 +11,7 @@ import (
 	_ "github.com/thomas-osgood/OGOR/misc/crosscompile"
 	_ "github.com/thomas-osgood/OGOR/misc/error-handling"
 	_ "github.com/thomas-osgood/OGOR/misc/generators"
+	_ "github.com/thomas-osgood/OGOR/misc/generics"
 	_ "github.com/thomas-osgood/OGOR/networking/apis"
 	_ "github.com/thomas-osgood/OGOR/networking/ipgrabber"
 	_ "github.com/thomas-osgood/OGOR/networking/ipinfo"
@@ -23,6 +24,9 @@ import (
 	_ "github.com/thomas-osgood/OGOR/protobufs/definitions/filehandler"
 	_ "github.com/thomas-osgood/OGOR/protobufs/filehandler"
 	_ "github.com/thomas-osgood/OGOR/protobufs/general"
+	_ "github.com/thomas-osgood/OGOR/sysinfo/firewalls"
+	_ "github.com/thomas-osgood/OGOR/sysinfo/general"
+	_ "github.com/thomas-osgood/OGOR/sysinfo/networking"
 	_ "github.com/thomas-osgood/OGOR/vulns/lfi"
 )
 
