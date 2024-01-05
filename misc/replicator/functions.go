@@ -2,63 +2,31 @@ package replicator
 
 import (
 	"os"
-	"syscall"
 )
 
-// function designed to replicate the currently running
-// process. this will spawn a new process and "Release"
-// it, allowing it to continue running even after the
-// current process has exited.
-//
-// this attempts to mimic the FORK command found in unix
-// systems on both UNIX and non-UNIX systems (ie: this
-// should work on Windows, too).
-func Replicate(args []string) (err error) {
-	var attr os.ProcAttr
-	var currentProc string
-	var procargs []string = make([]string, 0)
-	var spawned *os.Process
-	var sysproc *syscall.SysProcAttr
+// function designed to initialize and return a new replicator.
+func NewReplicator(optFuncs ...RepOptFunc) (replicator *Replicator, err error) {
+	var currentprog string
+	var currentSetting RepOptFunc
+	var defaultOptions ReplicatorOpts = ReplicatorOpts{}
 
-	// get the full name of the executable that spawned
-	// the currently running process. this will be used
-	// to spawn the clone later on in this function.
-	currentProc, err = os.Executable()
-	if err != nil {
-		return err
+	if currentprog, err = os.Executable(); err != nil {
+		return nil, err
 	}
 
-	// setup the arguments to the new process. argv[0]
-	// is always the process name.
-	procargs = append(procargs, currentProc)
-	procargs = append(procargs, args...)
+	defaultOptions.ProgramName = currentprog
+	defaultOptions.Args = []string{}
 
-	sysproc = &syscall.SysProcAttr{}
-
-	attr = os.ProcAttr{
-		Dir: ".",
-		Env: os.Environ(),
-		Files: []*os.File{
-			os.Stdin,
-			nil,
-			nil,
-		},
-		Sys: sysproc,
+	for _, currentSetting = range optFuncs {
+		if err = currentSetting(&defaultOptions); err != nil {
+			return nil, err
+		}
 	}
 
-	// spawn the new process with the command-line arguments
-	// provided via the args parameter of this function.
-	spawned, err = os.StartProcess(currentProc, procargs, &attr)
-	if err != nil {
-		return err
-	}
+	replicator = new(Replicator)
 
-	// Release (aka "detach") the process so it
-	// can keep running after this one exits.
-	err = spawned.Release()
-	if err != nil {
-		return err
-	}
+	replicator.progname = defaultOptions.ProgramName
+	replicator.args = defaultOptions.Args
 
-	return nil
+	return replicator, nil
 }
